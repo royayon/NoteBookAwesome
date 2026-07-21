@@ -89,6 +89,20 @@
         "title": "Open Cell Navigator",
         "category": "NotebookAwesome",
         "icon": "$(notebook)"
+      },
+      {
+        "command": "notebookawesome.jumpToCell",
+        "title": "Jump to Cell…",
+        "category": "NotebookAwesome",
+        "icon": "$(arrow-right)"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "notebookawesome.jumpToCell",
+        "key": "ctrl+alt+g",
+        "mac": "cmd+alt+g",
+        "when": "notebookEditorFocused || activeEditor == 'workbench.editor.notebook'"
       }
     ],
     "menus": {

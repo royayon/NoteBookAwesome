@@ -98,6 +98,36 @@ export function activate(context: vscode.ExtensionContext): void {
       codeLensProvider.refresh();
       panelProvider.refresh();
     }),
+
+    // Command: jump to a cell via QuickPick (Ctrl+Alt+G)
+    vscode.commands.registerCommand('notebookawesome.jumpToCell', async () => {
+      const editor = vscode.window.activeNotebookEditor;
+      if (!editor) {
+        vscode.window.showWarningMessage('NotebookAwesome: no notebook is open.');
+        return;
+      }
+      const items: Array<vscode.QuickPickItem & { index: number }> = [];
+      for (let i = 0; i < editor.notebook.cellCount; i++) {
+        const cell = editor.notebook.cellAt(i);
+        const name = getCellName(cell);
+        const isCode = cell.kind === vscode.NotebookCellKind.Code;
+        const firstLine = cell.document.getText().split('\n')[0].trim();
+        items.push({
+          label: name ? `${i + 1}: ${name}` : `Cell ${i + 1}`,
+          description: isCode ? 'Code' : 'MD',
+          detail: firstLine,
+          index: i,
+        });
+      }
+      const picked = await vscode.window.showQuickPick(items, {
+        title: 'Jump to Cell',
+        placeHolder: 'Type a cell number or name…',
+        matchOnDetail: true,
+      });
+      if (picked) {
+        vscode.commands.executeCommand('notebookawesome.navigateToCell', picked.index);
+      }
+    }),
   );
 }
 
