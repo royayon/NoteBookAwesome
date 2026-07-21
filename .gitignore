@@ -1,0 +1,10 @@
+node_modules/
+out/
+dist/
+*.vsix
+.env
+.DS_Store
+Thumbs.db
+
+# Claude Code memory & skills — never commit these
+.claude/

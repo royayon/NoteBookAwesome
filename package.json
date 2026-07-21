@@ -1,0 +1,106 @@
+{
+  "name": "notebookawesome",
+  "displayName": "NotebookAwesome",
+  "description": "Cell numbering, renameable headers, and a navigation panel for Jupyter notebooks. Works in VS Code, Cursor, Windsurf, and all VS Code-compatible editors.",
+  "version": "0.1.0",
+  "publisher": "royayon",
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/royayon/NoteBookAwesome.git"
+  },
+  "bugs": {
+    "url": "https://github.com/royayon/NoteBookAwesome/issues"
+  },
+  "homepage": "https://github.com/royayon/NoteBookAwesome#readme",
+  "engines": {
+    "vscode": "^1.70.0"
+  },
+  "categories": ["Other", "Notebooks"],
+  "keywords": ["jupyter", "notebook", "cells", "navigation", "outline", "cursor", "windsurf"],
+  "activationEvents": ["onNotebook:jupyter-notebook"],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "notebookawesome-sidebar",
+          "title": "NotebookAwesome",
+          "icon": "$(notebook)"
+        }
+      ]
+    },
+    "views": {
+      "notebookawesome-sidebar": [
+        {
+          "type": "webview",
+          "id": "notebookawesome.navigationPanel",
+          "name": "Cell Navigator"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "notebookawesome.renameCell",
+        "title": "Rename Cell",
+        "category": "NotebookAwesome",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "notebookawesome.clearCellName",
+        "title": "Clear Cell Name",
+        "category": "NotebookAwesome",
+        "icon": "$(close)"
+      },
+      {
+        "command": "notebookawesome.refreshPanel",
+        "title": "Refresh Navigator",
+        "category": "NotebookAwesome",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "notebookawesome.navigateToCell",
+        "title": "Navigate to Cell",
+        "category": "NotebookAwesome"
+      }
+    ],
+    "menus": {
+      "notebook/cell/title": [
+        {
+          "command": "notebookawesome.renameCell",
+          "when": "notebookType == 'jupyter-notebook'",
+          "group": "notebookawesome@1"
+        },
+        {
+          "command": "notebookawesome.clearCellName",
+          "when": "notebookType == 'jupyter-notebook'",
+          "group": "notebookawesome@2"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "notebookawesome.refreshPanel",
+          "when": "view == notebookawesome.navigationPanel",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "node esbuild.js --production",
+    "build": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "compile": "tsc --noEmit",
+    "package": "vsce package",
+    "publish:vsce": "vsce publish",
+    "publish:ovsx": "ovsx publish"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.70.0",
+    "@vscode/vsce": "^2.24.0",
+    "esbuild": "^0.20.0",
+    "ovsx": "^0.9.0",
+    "typescript": "^5.4.0"
+  }
+}
