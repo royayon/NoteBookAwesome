@@ -61,7 +61,7 @@ This means names are saved inside the `.ipynb` file, travel with it when shared,
 
 ## Contributing
 
-Contributions are welcome! See [FEATURES.md](FEATURES.md) for planned work and ideas.
+Contributions are welcome!
 
 1. Fork the repo
 2. Create a branch: `git checkout -b feature/my-feature`

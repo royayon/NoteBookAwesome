@@ -1,34 +1,54 @@
 import * as vscode from 'vscode';
-import { CellHeaderDecorator } from './cellDecorator';
+import { CellCodeLensProvider, CellSpacerDecorator } from './cellDecorator';
 import { NavigationPanelProvider } from './navigationPanel';
-import { getCellName, setCellName, getActiveCell } from './cellNaming';
+import { initCellNaming, getCellName, setCellName, getActiveCell } from './cellNaming';
 
 export function activate(context: vscode.ExtensionContext): void {
-  const decorator = new CellHeaderDecorator();
+  initCellNaming(context);
+  syncCodeLensFont();
+
+  const codeLensProvider = new CellCodeLensProvider();
+  const spacerDecorator = new CellSpacerDecorator();
   const panelProvider = new NavigationPanelProvider(context.extensionUri);
 
-  context.subscriptions.push(
-    decorator,
-    panelProvider,
+  // Refresh immediately for any notebooks already open when the extension activates
+  if (vscode.workspace.notebookDocuments.length > 0) {
+    codeLensProvider.refresh();
+    panelProvider.refresh();
+  }
 
-    vscode.notebooks.registerNotebookCellStatusBarItemProvider(
-      'jupyter-notebook',
-      decorator.getStatusBarProvider(),
+  context.subscriptions.push(
+    spacerDecorator,
+
+    // Cell header above each cell's code (CodeLens)
+    vscode.languages.registerCodeLensProvider(
+      { scheme: 'vscode-notebook-cell' },
+      codeLensProvider,
     ),
 
+    // Navigation panel (right-click the panel icon → Move to Secondary Side Bar)
     vscode.window.registerWebviewViewProvider(
       'notebookawesome.navigationPanel',
       panelProvider,
       { webviewOptions: { retainContextWhenHidden: true } },
     ),
 
-    // Refresh on notebook changes
+    // Keep CodeLens font 2px above editor font whenever the editor font changes
+    vscode.workspace.onDidChangeConfiguration(e => {
+      if (e.affectsConfiguration('editor.fontSize')) { syncCodeLensFont(); }
+    }),
+
+    // Refresh on notebook changes and opens
+    vscode.workspace.onDidOpenNotebookDocument(() => {
+      codeLensProvider.refresh();
+      panelProvider.refresh();
+    }),
     vscode.workspace.onDidChangeNotebookDocument(() => {
-      decorator.refresh();
+      codeLensProvider.refresh();
       panelProvider.refresh();
     }),
     vscode.window.onDidChangeActiveNotebookEditor(() => {
-      decorator.refresh();
+      codeLensProvider.refresh();
       panelProvider.refresh();
     }),
 
@@ -39,7 +59,7 @@ export function activate(context: vscode.ExtensionContext): void {
         vscode.window.showWarningMessage('NotebookAwesome: no cell is currently selected.');
         return;
       }
-      await promptRename(target, decorator, panelProvider);
+      await promptRename(target, codeLensProvider, panelProvider);
     }),
 
     // Command: rename cell by index (used from the nav panel)
@@ -47,7 +67,7 @@ export function activate(context: vscode.ExtensionContext): void {
       const editor = vscode.window.activeNotebookEditor;
       if (!editor) { return; }
       const target = editor.notebook.cellAt(index);
-      await promptRename(target, decorator, panelProvider);
+      await promptRename(target, codeLensProvider, panelProvider);
     }),
 
     // Command: clear the name from the active/focused cell
@@ -55,7 +75,7 @@ export function activate(context: vscode.ExtensionContext): void {
       const target = cell ?? getActiveCell();
       if (!target) { return; }
       await setCellName(target, undefined);
-      decorator.refresh();
+      codeLensProvider.refresh();
       panelProvider.refresh();
     }),
 
@@ -68,9 +88,14 @@ export function activate(context: vscode.ExtensionContext): void {
       editor.selection = range;
     }),
 
+    // Command: open the nav panel
+    vscode.commands.registerCommand('notebookawesome.openNavigator', () => {
+      vscode.commands.executeCommand('notebookawesome.navigationPanel.focus');
+    }),
+
     // Command: force-refresh the nav panel
     vscode.commands.registerCommand('notebookawesome.refreshPanel', () => {
-      decorator.refresh();
+      codeLensProvider.refresh();
       panelProvider.refresh();
     }),
   );
@@ -78,21 +103,27 @@ export function activate(context: vscode.ExtensionContext): void {
 
 async function promptRename(
   cell: vscode.NotebookCell,
-  decorator: CellHeaderDecorator,
-  panelProvider: NavigationPanelProvider,
+  codeLens: CellCodeLensProvider,
+  panel: NavigationPanelProvider,
 ): Promise<void> {
   const current = getCellName(cell);
   const input = await vscode.window.showInputBox({
     title: `Rename Cell ${cell.index + 1}`,
-    prompt: 'Enter a name for this cell. Leave empty to clear the name.',
+    prompt: 'Enter a name for this cell. Leave empty to clear.',
     value: current ?? '',
     placeHolder: `Cell ${cell.index + 1}`,
     validateInput: v => (v.length > 120 ? 'Name must be 120 characters or fewer.' : undefined),
   });
-  if (input === undefined) { return; } // user cancelled
+  if (input === undefined) { return; }
   await setCellName(cell, input.trim() || undefined);
-  decorator.refresh();
-  panelProvider.refresh();
+  codeLens.refresh();
+  panel.refresh();
 }
 
 export function deactivate(): void {}
+
+function syncCodeLensFont(): void {
+  const config = vscode.workspace.getConfiguration('editor');
+  const fontSize = config.get<number>('fontSize') ?? 14;
+  config.update('codeLensFontSize', fontSize + 2, vscode.ConfigurationTarget.Workspace);
+}

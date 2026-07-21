@@ -1,90 +1,30 @@
 import * as vscode from 'vscode';
 import { getCellName } from './cellNaming';
 
-export class CellHeaderDecorator implements vscode.Disposable {
-  private readonly _decorationType: vscode.TextEditorDecorationType;
-  private readonly _statusBarProvider: CellStatusBarProvider;
-  private readonly _disposables: vscode.Disposable[] = [];
+/** Shows "N: Name" as a CodeLens label above each notebook cell's code. */
+export class CellCodeLensProvider implements vscode.CodeLensProvider {
+  private readonly _onDidChange = new vscode.EventEmitter<void>();
+  readonly onDidChangeCodeLenses = this._onDidChange.event;
 
-  constructor() {
-    this._decorationType = vscode.window.createTextEditorDecorationType({});
-    this._statusBarProvider = new CellStatusBarProvider();
+  provideCodeLenses(document: vscode.TextDocument): vscode.CodeLens[] {
+    if (document.uri.scheme !== 'vscode-notebook-cell') { return []; }
+    const cell = getCellForDocument(document);
+    if (!cell) { return []; }
 
-    this._disposables.push(
-      vscode.window.onDidChangeVisibleTextEditors(() => this.decorateAll()),
-      vscode.workspace.onDidChangeNotebookDocument(() => this.decorateAll()),
-      vscode.window.onDidChangeActiveNotebookEditor(() => this.decorateAll()),
-    );
-
-    this.decorateAll();
-  }
-
-  decorateAll(): void {
-    for (const editor of vscode.window.visibleTextEditors) {
-      const cell = getCellForEditor(editor);
-      if (!cell) {
-        // Clear any leftover decorations from non-notebook editors
-        editor.setDecorations(this._decorationType, []);
-        continue;
-      }
-      this._applyDecoration(editor, cell);
-    }
-  }
-
-  private _applyDecoration(editor: vscode.TextEditor, cell: vscode.NotebookCell): void {
     const index = cell.index + 1;
     const name = getCellName(cell);
-    const label = name ? `${index}: ${name}` : `Cell ${index}`;
+    const label = name
+      ? `        ${index}:   ${name}        `
+      : `        Cell ${index}        `;
 
-    editor.setDecorations(this._decorationType, [
-      {
-        range: new vscode.Range(0, 0, 0, 0),
-        renderOptions: {
-          before: {
-            contentText: `  ${label}  `,
-            color: new vscode.ThemeColor('notebookStatusRunningIcon.foreground'),
-            backgroundColor: new vscode.ThemeColor('badge.background'),
-            margin: '0 8px 4px 0',
-            fontWeight: '600',
-            fontStyle: 'normal',
-          },
-        },
-      },
-    ]);
-  }
-
-  refresh(): void {
-    this.decorateAll();
-    this._statusBarProvider.refresh();
-  }
-
-  getStatusBarProvider(): CellStatusBarProvider {
-    return this._statusBarProvider;
-  }
-
-  dispose(): void {
-    this._decorationType.dispose();
-    this._disposables.forEach(d => d.dispose());
-  }
-}
-
-/** Provides a clickable rename button in each cell's status bar strip. */
-export class CellStatusBarProvider implements vscode.NotebookCellStatusBarItemProvider {
-  private readonly _onDidChange = new vscode.EventEmitter<void>();
-  readonly onDidChangeCellStatusBarItems = this._onDidChange.event;
-
-  provideCellStatusBarItems(cell: vscode.NotebookCell): vscode.NotebookCellStatusBarItem[] {
-    const name = getCellName(cell);
-    const renameItem = new vscode.NotebookCellStatusBarItem(
-      name ? '$(edit) Rename' : '$(tag) Name cell',
-      vscode.NotebookCellStatusBarAlignment.Left,
-    );
-    renameItem.command = {
-      title: 'Rename Cell',
-      command: 'notebookawesome.renameCell',
-    };
-    renameItem.tooltip = 'NotebookAwesome: rename this cell';
-    return [renameItem];
+    const range = new vscode.Range(0, 0, 0, 0);
+    return [
+      new vscode.CodeLens(range, {
+        title: label,
+        command: 'notebookawesome.renameCell',
+        tooltip: 'Click to rename this cell',
+      }),
+    ];
   }
 
   refresh(): void {
@@ -92,16 +32,74 @@ export class CellStatusBarProvider implements vscode.NotebookCellStatusBarItemPr
   }
 }
 
-function getCellForEditor(editor: vscode.TextEditor): vscode.NotebookCell | undefined {
-  if (editor.document.uri.scheme !== 'vscode-notebook-cell') { return undefined; }
-  const editorUriStr = editor.document.uri.toString();
-  for (const notebookEditor of vscode.window.visibleNotebookEditors) {
-    const nb = notebookEditor.notebook;
+/**
+ * Draws a thin separator line and adds vertical breathing room between the
+ * CodeLens cell header and the first line of code.
+ */
+export class CellSpacerDecorator implements vscode.Disposable {
+  private readonly _lineType: vscode.TextEditorDecorationType;
+  private readonly _spacerType: vscode.TextEditorDecorationType;
+  private readonly _disposables: vscode.Disposable[] = [];
+
+  constructor() {
+    // Separator line — explicit dark/light colors so it always renders
+    this._lineType = vscode.window.createTextEditorDecorationType({
+      isWholeLine: true,
+      borderStyle: 'solid',
+      borderWidth: '1px 0 0 0',
+      dark:  { borderColor: 'rgba(255, 255, 255, 0.18)' },
+      light: { borderColor: 'rgba(0, 0, 0, 0.18)' },
+    });
+
+    // Space above and below the separator for breathing room
+    this._spacerType = vscode.window.createTextEditorDecorationType({
+      before: {
+        contentText: ' ',
+        color: 'transparent',
+        margin: '10px 0 10px 0',
+      },
+    });
+
+    this._disposables.push(
+      vscode.window.onDidChangeVisibleTextEditors(() => this._applyAll()),
+      vscode.workspace.onDidChangeNotebookDocument(() => this._applyAll()),
+      vscode.window.onDidChangeActiveNotebookEditor(() => this._applyAll()),
+      vscode.workspace.onDidOpenNotebookDocument(() => this._applyAll()),
+    );
+
+    this._applyAll();
+  }
+
+  private _applyAll(): void {
+    for (const editor of vscode.window.visibleTextEditors) {
+      if (editor.document.uri.scheme !== 'vscode-notebook-cell') {
+        editor.setDecorations(this._lineType, []);
+        editor.setDecorations(this._spacerType, []);
+        continue;
+      }
+      const line0 = new vscode.Range(0, 0, 0, 0);
+      editor.setDecorations(this._lineType, [line0]);
+      editor.setDecorations(this._spacerType, [line0]);
+    }
+  }
+
+  refresh(): void {
+    this._applyAll();
+  }
+
+  dispose(): void {
+    this._lineType.dispose();
+    this._spacerType.dispose();
+    this._disposables.forEach(d => d.dispose());
+  }
+}
+
+function getCellForDocument(document: vscode.TextDocument): vscode.NotebookCell | undefined {
+  const uriStr = document.uri.toString();
+  for (const nb of vscode.workspace.notebookDocuments) {
     for (let i = 0; i < nb.cellCount; i++) {
       const cell = nb.cellAt(i);
-      if (cell.document.uri.toString() === editorUriStr) {
-        return cell;
-      }
+      if (cell.document.uri.toString() === uriStr) { return cell; }
     }
   }
   return undefined;

@@ -6,6 +6,7 @@ out/**
 src/**
 esbuild.js
 tsconfig.json
+icon.svg
 **/*.map
 **/*.ts
 !dist/**

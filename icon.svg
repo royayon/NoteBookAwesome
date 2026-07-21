@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1A3A6E"/>
+      <stop offset="100%" stop-color="#0A1A38"/>
+    </linearGradient>
+    <linearGradient id="activeCell" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0EA5E9" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#06B6D4" stop-opacity="0.2"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="128" height="128" rx="22" fill="url(#bg)"/>
+
+  <!-- Subtle inner glow at top -->
+  <ellipse cx="64" cy="0" rx="60" ry="30" fill="#2563EB" fill-opacity="0.18"/>
+
+  <!-- ── Cell 1 (top) ── -->
+  <rect x="14" y="17" width="100" height="24" rx="6" fill="white" fill-opacity="0.07"/>
+  <!-- Number gutter -->
+  <rect x="14" y="17" width="20" height="24" rx="6" fill="white" fill-opacity="0.1"/>
+  <text x="24" y="33" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-size="11" font-weight="700" fill="white" fill-opacity="0.55">1</text>
+  <!-- Code lines -->
+  <rect x="42" y="24" width="48" height="3.5" rx="1.75" fill="white" fill-opacity="0.22"/>
+  <rect x="42" y="31" width="32" height="3.5" rx="1.75" fill="white" fill-opacity="0.13"/>
+
+  <!-- ── Cell 2 (active / highlighted) ── -->
+  <rect x="14" y="48" width="100" height="30" rx="6" fill="url(#activeCell)"/>
+  <rect x="14" y="48" width="100" height="30" rx="6" stroke="#06B6D4" stroke-width="1.5" fill="none" stroke-opacity="0.9"/>
+  <!-- Number gutter active -->
+  <rect x="14" y="48" width="20" height="30" rx="6" fill="#06B6D4" fill-opacity="0.4"/>
+  <text x="24" y="67" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-size="11" font-weight="700" fill="white">2</text>
+  <!-- Code lines active -->
+  <rect x="42" y="55" width="56" height="3.5" rx="1.75" fill="#BAE6FD" fill-opacity="0.75"/>
+  <rect x="42" y="62" width="38" height="3.5" rx="1.75" fill="#BAE6FD" fill-opacity="0.5"/>
+  <rect x="42" y="69" width="26" height="3.5" rx="1.75" fill="#BAE6FD" fill-opacity="0.3"/>
+  <!-- Active dot -->
+  <circle cx="112" cy="63" r="3.5" fill="#06B6D4"/>
+  <circle cx="112" cy="63" r="6" fill="#06B6D4" fill-opacity="0.2"/>
+
+  <!-- ── Cell 3 (bottom) ── -->
+  <rect x="14" y="86" width="100" height="24" rx="6" fill="white" fill-opacity="0.07"/>
+  <!-- Number gutter -->
+  <rect x="14" y="86" width="20" height="24" rx="6" fill="white" fill-opacity="0.1"/>
+  <text x="24" y="102" text-anchor="middle" font-family="'Segoe UI',Arial,sans-serif" font-size="11" font-weight="700" fill="white" fill-opacity="0.55">3</text>
+  <!-- Code lines -->
+  <rect x="42" y="93" width="42" height="3.5" rx="1.75" fill="white" fill-opacity="0.22"/>
+  <rect x="42" y="100" width="28" height="3.5" rx="1.75" fill="white" fill-opacity="0.13"/>
+
+  <!-- ── Star (top-right "Awesome" badge) ── -->
+  <g transform="translate(88,8)">
+    <!-- 4-point star -->
+    <path d="M10,0 L12,8 L20,10 L12,12 L10,20 L8,12 L0,10 L8,8 Z" fill="#FBBF24"/>
+    <path d="M10,0 L12,8 L20,10 L12,12 L10,20 L8,12 L0,10 L8,8 Z" fill="#F59E0B" fill-opacity="0.4"/>
+  </g>
+</svg>

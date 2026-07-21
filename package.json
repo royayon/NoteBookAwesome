@@ -16,15 +16,36 @@
   "engines": {
     "vscode": "^1.70.0"
   },
-  "categories": ["Other", "Notebooks"],
-  "keywords": ["jupyter", "notebook", "cells", "navigation", "outline", "cursor", "windsurf"],
-  "activationEvents": ["onNotebook:jupyter-notebook"],
+  "categories": [
+    "Other",
+    "Notebooks"
+  ],
+  "keywords": [
+    "jupyter",
+    "notebook",
+    "cells",
+    "navigation",
+    "outline",
+    "cursor",
+    "windsurf"
+  ],
+  "activationEvents": [
+    "onNotebook:jupyter-notebook"
+  ],
+  "icon": "icon.png",
   "main": "./dist/extension.js",
   "contributes": {
     "viewsContainers": {
       "activitybar": [
         {
           "id": "notebookawesome-sidebar",
+          "title": "NotebookAwesome",
+          "icon": "$(notebook)"
+        }
+      ],
+      "panel": [
+        {
+          "id": "notebookawesome-panel",
           "title": "NotebookAwesome",
           "icon": "$(notebook)"
         }
@@ -62,21 +83,15 @@
         "command": "notebookawesome.navigateToCell",
         "title": "Navigate to Cell",
         "category": "NotebookAwesome"
+      },
+      {
+        "command": "notebookawesome.openNavigator",
+        "title": "Open Cell Navigator",
+        "category": "NotebookAwesome",
+        "icon": "$(notebook)"
       }
     ],
     "menus": {
-      "notebook/cell/title": [
-        {
-          "command": "notebookawesome.renameCell",
-          "when": "notebookType == 'jupyter-notebook'",
-          "group": "notebookawesome@1"
-        },
-        {
-          "command": "notebookawesome.clearCellName",
-          "when": "notebookType == 'jupyter-notebook'",
-          "group": "notebookawesome@2"
-        }
-      ],
       "view/title": [
         {
           "command": "notebookawesome.refreshPanel",
@@ -96,6 +111,7 @@
     "publish:ovsx": "ovsx publish"
   },
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "@types/node": "^20.0.0",
     "@types/vscode": "^1.70.0",
     "@vscode/vsce": "^2.24.0",

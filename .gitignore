@@ -8,3 +8,6 @@ Thumbs.db
 
 # Claude Code memory & skills — never commit these
 .claude/
+
+# Internal planning docs — dev only, not for the public repo
+dev/
