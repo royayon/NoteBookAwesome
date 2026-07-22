@@ -1,22 +1,24 @@
 import * as vscode from 'vscode';
 import { CellCodeLensProvider, CellSpacerDecorator } from './cellDecorator';
 import { NavigationPanelProvider } from './navigationPanel';
-import { initCellNaming, getCellName, setCellName, getActiveCell } from './cellNaming';
+import { getCellName, setCellName, getActiveCell, seedCellPropsFromNotebook, injectMetadataIntoFile } from './cellNaming';
 
 const noopColorDecorator = { refresh() {} };
 
 export function activate(context: vscode.ExtensionContext): void {
-  initCellNaming(context);
   syncCodeLensFont();
 
   const codeLensProvider = new CellCodeLensProvider();
   const spacerDecorator = new CellSpacerDecorator();
   const panelProvider = new NavigationPanelProvider(context.extensionUri, noopColorDecorator);
 
-  // Refresh immediately for any notebooks already open when the extension activates
-  if (vscode.workspace.notebookDocuments.length > 0) {
-    codeLensProvider.refresh();
-    panelProvider.refresh();
+  // Seed in-memory cache from .ipynb for notebooks already open at activation
+  const seedPromises = vscode.workspace.notebookDocuments.map(nb => seedCellPropsFromNotebook(nb));
+  if (seedPromises.length > 0) {
+    Promise.all(seedPromises).then(() => {
+      codeLensProvider.refresh();
+      panelProvider.refresh();
+    });
   }
 
   context.subscriptions.push(
@@ -41,11 +43,18 @@ export function activate(context: vscode.ExtensionContext): void {
     }),
 
     // Refresh on notebook changes and opens
-    vscode.workspace.onDidOpenNotebookDocument(() => {
+    vscode.workspace.onDidOpenNotebookDocument(async notebook => {
+      await seedCellPropsFromNotebook(notebook);
       codeLensProvider.refresh();
       panelProvider.refresh();
     }),
-    vscode.workspace.onDidChangeNotebookDocument(e => {
+
+    // After each save: patch the .ipynb file on disk with our metadata so names/colors
+    // travel with the file when it's copied or shared
+    vscode.workspace.onDidSaveNotebookDocument(notebook => {
+      injectMetadataIntoFile(notebook);
+    }),
+    vscode.workspace.onDidChangeNotebookDocument(async e => {
       // Track execution state first (targeted webview message, no full re-render)
       for (const change of e.cellChanges) {
         const cell = change.cell;
@@ -55,6 +64,11 @@ export function activate(context: vscode.ExtensionContext): void {
         } else if (change.executionSummary !== undefined && summary?.success !== undefined) {
           panelProvider.updateCellExecState(cell, false);
         }
+      }
+      // Structural content change = cells added/removed or file replaced from disk.
+      // Re-seed the cache so an externally replaced .ipynb is reflected immediately.
+      if (e.contentChanges.length > 0) {
+        await seedCellPropsFromNotebook(e.notebook);
       }
       // Only do a full panel re-render for structural/content/metadata changes —
       // not for output-only changes during execution (avoids restarting the animation)

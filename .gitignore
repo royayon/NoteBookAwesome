@@ -11,3 +11,6 @@ Thumbs.db
 
 # Internal planning docs — dev only, not for the public repo
 dev/
+
+# Test artifacts
+samples/new folder/

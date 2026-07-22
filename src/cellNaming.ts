@@ -1,51 +1,87 @@
 import * as vscode from 'vscode';
 import { createHash } from 'crypto';
 
-const METADATA_KEY = 'notebookawesome';
+// In-memory cache: notebook URI → { hash → { name?, color? } }
+// Populated from the .ipynb file on every notebook open.
+type CellMap = Record<string, Record<string, string>>;
+const _cache = new Map<string, CellMap>();
 
-let _ctx: vscode.ExtensionContext | undefined;
-
-export function initCellNaming(ctx: vscode.ExtensionContext): void {
-  _ctx = ctx;
-}
-
-// SHA-1 of cell source, scoped to notebook URI.
-// Stable across reorders: the hash follows the content, not the position.
-// Known edge case: two cells with identical content share a name — acceptable
-// in practice since meaningful cells are rarely byte-for-byte identical.
-function wsKey(prop: string, cell: vscode.NotebookCell): string {
-  const hash = createHash('sha1').update(cell.document.getText()).digest('hex').slice(0, 16);
-  return `nba.${prop}:${cell.notebook.uri.toString()}:${hash}`;
+function cellHash(cell: vscode.NotebookCell): string {
+  return createHash('sha1').update(cell.document.getText()).digest('hex').slice(0, 16);
 }
 
 function getCellProp(prop: string, cell: vscode.NotebookCell): string | undefined {
-  // Primary: content-hash key survives drag-and-drop reorders
-  const fromWs = _ctx?.workspaceState.get<string>(wsKey(prop, cell));
-  if (fromWs) { return fromWs; }
-  // Fallback: cell metadata (written for .ipynb portability, or from older versions)
-  return (cell.metadata?.[METADATA_KEY] as Record<string, string> | undefined)?.[prop];
+  return _cache.get(cell.notebook.uri.toString())?.[cellHash(cell)]?.[prop];
 }
 
 async function setCellProp(prop: string, cell: vscode.NotebookCell, value: string | undefined): Promise<void> {
-  // Authoritative store: workspaceState by content hash
-  await _ctx?.workspaceState.update(wsKey(prop, cell), value);
+  const key = cell.notebook.uri.toString();
+  const map: CellMap = { ...(_cache.get(key) ?? {}) };
+  const hash = cellHash(cell);
+  const entry = { ...(map[hash] ?? {}) };
 
-  // Also write to cell metadata so the value travels with the .ipynb when shared
-  const existingNba = (cell.metadata?.[METADATA_KEY] ?? {}) as Record<string, unknown>;
-  const updatedNba = { ...existingNba };
-  if (value) {
-    updatedNba[prop] = value;
+  if (value !== undefined) {
+    entry[prop] = value;
   } else {
-    delete updatedNba[prop];
+    delete entry[prop];
   }
 
-  const updatedMeta: Record<string, unknown> = { ...cell.metadata, [METADATA_KEY]: updatedNba };
-  if (!Object.keys(updatedNba).length) { delete updatedMeta[METADATA_KEY]; }
+  if (Object.keys(entry).length) {
+    map[hash] = entry;
+  } else {
+    delete map[hash];
+  }
 
-  const edit = new vscode.WorkspaceEdit();
-  edit.set(cell.notebook.uri, [vscode.NotebookEdit.updateCellMetadata(cell.index, updatedMeta)]);
-  await vscode.workspace.applyEdit(edit);
+  _cache.set(key, map);
+  // Disk write happens in injectMetadataIntoFile() on every save
 }
+
+// ── .ipynb I/O ─────────────────────────────────────────────────────────────
+
+const NBA_KEY = 'notebookawesome';
+type IpynbRoot = { metadata?: Record<string, unknown>; [key: string]: unknown };
+
+/**
+ * Reads names/colors from the .ipynb file and seeds the in-memory cache.
+ * The file always wins on open — stale cache is replaced.
+ */
+export async function seedCellPropsFromNotebook(notebook: vscode.NotebookDocument): Promise<void> {
+  try {
+    const bytes = await vscode.workspace.fs.readFile(notebook.uri);
+    const ipynb = JSON.parse(new TextDecoder().decode(bytes)) as IpynbRoot;
+    const nba = ipynb.metadata?.[NBA_KEY] as { cells?: CellMap } | undefined;
+    _cache.set(notebook.uri.toString(), nba?.cells ?? {});
+  } catch {
+    _cache.set(notebook.uri.toString(), {});
+  }
+}
+
+/**
+ * Patches the .ipynb file on disk with all current names/colors from the cache.
+ * Called from onDidSaveNotebookDocument — runs after the Jupyter extension writes
+ * the file so we don't fight their serializer.
+ */
+export async function injectMetadataIntoFile(notebook: vscode.NotebookDocument): Promise<void> {
+  const map = _cache.get(notebook.uri.toString()) ?? {};
+  try {
+    const bytes = await vscode.workspace.fs.readFile(notebook.uri);
+    const ipynb = JSON.parse(new TextDecoder().decode(bytes)) as IpynbRoot;
+
+    if (!ipynb.metadata) { ipynb.metadata = {}; }
+    if (Object.keys(map).length) {
+      ipynb.metadata[NBA_KEY] = { cells: map };
+    } else {
+      delete ipynb.metadata[NBA_KEY];
+    }
+
+    await vscode.workspace.fs.writeFile(
+      notebook.uri,
+      new TextEncoder().encode(JSON.stringify(ipynb, null, 1)),
+    );
+  } catch { /* best-effort */ }
+}
+
+// ── Public API ─────────────────────────────────────────────────────────────
 
 export function getCellName(cell: vscode.NotebookCell): string | undefined {
   return getCellProp('name', cell);
