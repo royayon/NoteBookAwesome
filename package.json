@@ -97,6 +97,31 @@
         "icon": "$(arrow-right)"
       }
     ],
+    "configuration": {
+      "title": "NotebookAwesome",
+      "properties": {
+        "notebookawesome.colorPalette": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "description": "Display name of the color" },
+              "color": { "type": "string", "description": "CSS color value, e.g. #e05252" }
+            },
+            "required": ["name", "color"]
+          },
+          "default": [
+            { "name": "Red", "color": "#e05252" },
+            { "name": "Orange", "color": "#e08a3c" },
+            { "name": "Yellow", "color": "#d4b83c" },
+            { "name": "Green", "color": "#4caf6e" },
+            { "name": "Blue", "color": "#4a90d9" },
+            { "name": "Purple", "color": "#9b6dd6" }
+          ],
+          "description": "Colors available for cell color tags."
+        }
+      }
+    },
     "keybindings": [
       {
         "command": "notebookawesome.jumpToCell",

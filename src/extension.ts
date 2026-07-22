@@ -3,13 +3,15 @@ import { CellCodeLensProvider, CellSpacerDecorator } from './cellDecorator';
 import { NavigationPanelProvider } from './navigationPanel';
 import { initCellNaming, getCellName, setCellName, getActiveCell } from './cellNaming';
 
+const noopColorDecorator = { refresh() {} };
+
 export function activate(context: vscode.ExtensionContext): void {
   initCellNaming(context);
   syncCodeLensFont();
 
   const codeLensProvider = new CellCodeLensProvider();
   const spacerDecorator = new CellSpacerDecorator();
-  const panelProvider = new NavigationPanelProvider(context.extensionUri);
+  const panelProvider = new NavigationPanelProvider(context.extensionUri, noopColorDecorator);
 
   // Refresh immediately for any notebooks already open when the extension activates
   if (vscode.workspace.notebookDocuments.length > 0) {
@@ -43,9 +45,25 @@ export function activate(context: vscode.ExtensionContext): void {
       codeLensProvider.refresh();
       panelProvider.refresh();
     }),
-    vscode.workspace.onDidChangeNotebookDocument(() => {
-      codeLensProvider.refresh();
-      panelProvider.refresh();
+    vscode.workspace.onDidChangeNotebookDocument(e => {
+      // Track execution state first (targeted webview message, no full re-render)
+      for (const change of e.cellChanges) {
+        const cell = change.cell;
+        const summary = cell.executionSummary;
+        if (change.outputs !== undefined && change.outputs.length === 0) {
+          panelProvider.updateCellExecState(cell, true);
+        } else if (change.executionSummary !== undefined && summary?.success !== undefined) {
+          panelProvider.updateCellExecState(cell, false);
+        }
+      }
+      // Only do a full panel re-render for structural/content/metadata changes —
+      // not for output-only changes during execution (avoids restarting the animation)
+      const needsRefresh = e.contentChanges.length > 0
+        || e.cellChanges.some(c => c.document !== undefined || c.metadata !== undefined);
+      if (needsRefresh) {
+        codeLensProvider.refresh();
+        panelProvider.refresh();
+      }
     }),
     vscode.window.onDidChangeActiveNotebookEditor(() => {
       codeLensProvider.refresh();
