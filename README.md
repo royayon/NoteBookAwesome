@@ -29,8 +29,6 @@ A thin bar below each code cell row in the navigator shows its execution state a
 | Success | Solid green |
 | Failed | Solid red |
 
-Click the bar to scroll directly to that cell's **output** — useful when outputs are long and the next cell is far below.
-
 ### Jump to cell — `Ctrl+Alt+G`
 A quick-pick menu that filters all cells by number, name, or first line of code. Keyboard-navigable; press Enter to jump.
 
@@ -69,7 +67,6 @@ Search **NotebookAwesome** in your editor's Extensions panel, or visit [open-vsx
 ### Navigate
 - Open the **Cell Navigator** from the Activity Bar (notebook icon)
 - Click any row to jump to that cell
-- Click the **execution bar** on a code cell row to scroll to its output
 
 ### Filter and search
 - Type in the search box to filter by cell number or name

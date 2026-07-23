@@ -59,17 +59,6 @@ export class NavigationPanelProvider implements vscode.WebviewViewProvider, vsco
           await setCellColor(cell, (msg.colorName as string | null) || undefined);
           this._colorDecorator.refresh();
           this._render();
-        } else if (msg.type === 'jumpToOutput') {
-          const editor = vscode.window.activeNotebookEditor ?? this._lastEditor;
-          if (!editor) { return; }
-          const index = msg.index as number;
-          editor.selection = new vscode.NotebookRange(index, index + 1);
-          // First ensure the cell is in view, then ask VS Code to scroll to its output
-          editor.revealRange(
-            new vscode.NotebookRange(index, index + 1),
-            vscode.NotebookEditorRevealType.InCenterIfOutsideViewport,
-          );
-          await vscode.commands.executeCommand('notebook.cell.scrollOutputIntoView');
         } else if (msg.type === 'toggleGrouping') {
           this._grouped = !this._grouped;
           this._render();
@@ -159,9 +148,7 @@ function cellRow(cell: vscode.NotebookCell, idx: number, palette: Map<string, st
   const labelCls = isCode ? 'label' : 'label md-label';
   return `<div class="row${cls}" data-index="${idx}" data-type="${isCode ? 'code' : 'md'}" data-color="${escapeHtml(colorName ?? '')}"${execAttr}${edgeStyle} onclick="navigate(${idx})">
   <span class="${labelCls}" ondblclick="event.stopPropagation();renameCell(${idx})" title="Double-click to rename">${label}</span>
-  ${isCode
-    ? `<span class="exec-bar" title="Jump to output" onclick="event.stopPropagation();jumpToOutput(${idx})"></span>`
-    : '<span class="exec-spacer"></span>'}
+  ${isCode ? '<span class="exec-bar"></span>' : '<span class="exec-spacer"></span>'}
   <button class="color-btn" title="Set cell color"${dotStyle} onclick="event.stopPropagation();openColorPicker(${idx}, this)">●</button>
 </div>`;
 }
@@ -255,7 +242,7 @@ function buildHtml(cells: vscode.NotebookCell[], grouped: boolean, paletteEntrie
   .empty { padding: 16px 10px; color: var(--vscode-descriptionForeground); font-style: italic; font-size: 12px; text-align: center; }
 
   /* execution state indicator — short bar on right side, code cells only */
-  .exec-bar { flex-shrink: 0; width: 18px; height: 2px; border-radius: 2px; background: rgba(128,128,128,0.22); cursor: pointer; }
+  .exec-bar { flex-shrink: 0; width: 18px; height: 2px; border-radius: 2px; background: rgba(128,128,128,0.22); }
   .exec-spacer { flex-shrink: 0; width: 18px; }
   .row[data-exec="running"] .exec-bar { background: #4ade80; animation: nba-pulse 0.9s ease-in-out infinite; }
   .row[data-exec="success"] .exec-bar { background: rgba(74,222,128,0.8); }
@@ -306,7 +293,6 @@ ${emptyMsg}
   let _pickerTarget = -1;
 
   function navigate(index) { vscode.postMessage({ type: 'navigateToCell', index }); }
-  function jumpToOutput(index) { vscode.postMessage({ type: 'jumpToOutput', index }); }
   function renameCell(index) { vscode.postMessage({ type: 'renameCell', index }); }
   function toggleGrouping() { vscode.postMessage({ type: 'toggleGrouping' }); }
 
