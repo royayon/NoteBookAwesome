@@ -1,12 +1,22 @@
 name: Release
 
-# Publishes to the VS Code Marketplace and Open VSX whenever a version tag is
-# pushed (e.g. v0.2.0). Cut a release locally with `npm run release`, then
+# Tag push (v*) -> full release: package, publish to both marketplaces, cut a
+# GitHub Release. Cut a release locally with `npm run release`, then
 # `git push --follow-tags`.
+#
+# Manual run ("Run workflow") -> Open VSX only: packages the current ref and
+# publishes to Open VSX, skipping the VS Code Marketplace publish and GitHub
+# Release. Use this to (re)publish to Open VSX without touching a version that
+# is already live on the VS Code Marketplace.
+#
+# Packaging and each marketplace publish are separate jobs. If one marketplace
+# fails on a tag run, use "Re-run failed jobs" — GitHub only reruns the failed
+# job (and dependents), so an already-successful publish is not repeated.
 on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
 
 permissions:
   contents: write # needed to create the GitHub Release
@@ -16,40 +26,81 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  release:
+  package:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      # Node 20 here (not 18): @vscode/vsce -> cheerio -> undici@7 needs the
-      # global File API introduced in Node 20. Only the packaging/publishing
-      # toolchain requires this; the extension itself still targets VS Code 1.70.
-      - name: Setup Node 20
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      # Node 20 (not 18): @vscode/vsce -> cheerio -> undici@7 needs the global
+      # File API added in Node 20. Only the toolchain needs this; the extension
+      # itself still targets VS Code 1.70.
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
+      - run: npm ci
       - name: Typecheck
         run: npm run compile
-
       - name: Package extension
         run: npx @vscode/vsce package -o notebookawesome.vsix
+      - name: Upload VSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vsix
+          path: notebookawesome.vsix
+          retention-days: 7
 
+  publish-vscode:
+    needs: package
+    if: github.event_name == 'push' # tag runs only, not manual dispatch
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: vsix
       - name: Publish to VS Code Marketplace
         run: npx @vscode/vsce publish --packagePath notebookawesome.vsix --pat "$VSCE_PAT"
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
 
+  publish-openvsx:
+    needs: package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: vsix
+      # Idempotent: succeeds the first time, and the "|| true" swallows the
+      # "namespace already exists" error on every subsequent run.
+      - name: Ensure Open VSX namespace exists
+        run: npx ovsx create-namespace royayon --pat "$OVSX_PAT" || true
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
       - name: Publish to Open VSX
         run: npx ovsx publish notebookawesome.vsix --pat "$OVSX_PAT"
         env:
           OVSX_PAT: ${{ secrets.OVSX_PAT }}
 
+  github-release:
+    needs: [publish-vscode, publish-openvsx]
+    if: github.event_name == 'push' # only cut a Release for real tag runs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vsix
       - name: Create GitHub Release
         run: gh release create "${{ github.ref_name }}" notebookawesome.vsix --title "${{ github.ref_name }}" --generate-notes
         env:
