@@ -105,18 +105,45 @@
           "items": {
             "type": "object",
             "properties": {
-              "name": { "type": "string", "description": "Display name of the color" },
-              "color": { "type": "string", "description": "CSS color value, e.g. #e05252" }
+              "name": {
+                "type": "string",
+                "description": "Display name of the color"
+              },
+              "color": {
+                "type": "string",
+                "description": "CSS color value, e.g. #e05252"
+              }
             },
-            "required": ["name", "color"]
+            "required": [
+              "name",
+              "color"
+            ]
           },
           "default": [
-            { "name": "Red", "color": "#e05252" },
-            { "name": "Orange", "color": "#e08a3c" },
-            { "name": "Yellow", "color": "#d4b83c" },
-            { "name": "Green", "color": "#4caf6e" },
-            { "name": "Blue", "color": "#4a90d9" },
-            { "name": "Purple", "color": "#9b6dd6" }
+            {
+              "name": "Red",
+              "color": "#e05252"
+            },
+            {
+              "name": "Orange",
+              "color": "#e08a3c"
+            },
+            {
+              "name": "Yellow",
+              "color": "#d4b83c"
+            },
+            {
+              "name": "Green",
+              "color": "#4caf6e"
+            },
+            {
+              "name": "Blue",
+              "color": "#4a90d9"
+            },
+            {
+              "name": "Purple",
+              "color": "#9b6dd6"
+            }
           ],
           "description": "Colors available for cell color tags."
         }
@@ -147,13 +174,16 @@
     "compile": "tsc --noEmit",
     "package": "vsce package",
     "publish:vsce": "vsce publish",
-    "publish:ovsx": "ovsx publish"
+    "publish:ovsx": "ovsx publish",
+    "release": "commit-and-tag-version",
+    "release:first": "commit-and-tag-version --first-release"
   },
   "devDependencies": {
     "@resvg/resvg-js": "^2.6.2",
     "@types/node": "^20.0.0",
     "@types/vscode": "^1.70.0",
     "@vscode/vsce": "^2.24.0",
+    "commit-and-tag-version": "^12.7.3",
     "esbuild": "^0.20.0",
     "ovsx": "^0.9.0",
     "typescript": "^5.4.0"
