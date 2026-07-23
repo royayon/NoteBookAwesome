@@ -6,6 +6,10 @@ Give every cell a name, a color, and an instant jump target — all stored insid
 
 Works in **VS Code**, **Cursor**, **Windsurf**, and every VS Code-compatible editor.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/royayon/NoteBookAwesome/main/images/Navigator.png" alt="NotebookAwesome Cell Navigator panel — grouped cells with names and color tags" width="320" />
+</p>
+
 ---
 
 ## Features
@@ -14,7 +18,10 @@ Works in **VS Code**, **Cursor**, **Windsurf**, and every VS Code-compatible edi
 A sidebar panel that lists every cell in your notebook. Click any row to jump to it instantly. Filter by Code or Markdown, filter by color, search by name or number — the panel keeps up as you work.
 
 ### Renameable cell headers
-Give any cell a memorable name. The name appears above the cell code and in the navigator. Double-click a row in the panel to rename it inline, or use the Command Palette.
+Give any cell a memorable name. The name appears above the cell code and in the navigator. Double-click a row in the panel to rename it inline, or use the Command Palette. Cells you haven't named show their number automatically.
+
+<img src="https://raw.githubusercontent.com/royayon/NoteBookAwesome/main/images/Cell_Rename.png" alt="A renamed cell header reading '9: Train Test Split'" width="380" />
+<img src="https://raw.githubusercontent.com/royayon/NoteBookAwesome/main/images/Cell_Numbering.png" alt="A default cell header reading 'Cell 13'" width="380" />
 
 ### Cell color tags
 Tag cells with colors from a customizable palette. A colored dot appears next to each cell in the navigator. Filter the panel down to a single color to focus on just those cells.

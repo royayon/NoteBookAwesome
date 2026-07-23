@@ -5,6 +5,7 @@
 .claude/**
 dev/**
 samples/**
+images/**
 node_modules/**
 out/**
 src/**
