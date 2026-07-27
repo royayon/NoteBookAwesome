@@ -3,6 +3,8 @@
 All notable changes to NotebookAwesome are documented here.
 This file is generated from [Conventional Commits](https://www.conventionalcommits.org/).
 
+## [0.2.3](https://github.com/royayon/NoteBookAwesome/compare/v0.2.2...v0.2.3) (2026-07-27)
+
 ## [0.2.2](https://github.com/royayon/NoteBookAwesome/compare/v0.2.1...v0.2.2) (2026-07-27)
 
 ## [0.2.1](https://github.com/royayon/NoteBookAwesome/compare/v0.2.0...v0.2.1) (2026-07-27)
