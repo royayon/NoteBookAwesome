@@ -56,13 +56,17 @@ export function activate(context: vscode.ExtensionContext): void {
     }),
     vscode.workspace.onDidChangeNotebookDocument(async e => {
       // Track execution state first (targeted webview message, no full re-render)
+      // Distinguish an execution start from "Clear All Outputs"/"Restart": a real
+      // run clears one cell's outputs at a time, whereas a bulk clear empties many
+      // cells in a single change event. Only the single-cell case is "running".
+      const cleared = e.cellChanges.filter(c => c.outputs !== undefined && c.outputs.length === 0);
+      const bulkClear = cleared.length > 1;
       for (const change of e.cellChanges) {
         const cell = change.cell;
         const summary = cell.executionSummary;
-        // Cleared outputs = execution just (re)started → show the running animation.
-        // A stale executionOrder from a previous run must NOT suppress this.
         if (change.outputs !== undefined && change.outputs.length === 0) {
-          panelProvider.updateCellExecState(cell, true);
+          // Single clear → running animation; bulk clear → resolve to idle/last state.
+          panelProvider.updateCellExecState(cell, !bulkClear);
         } else if (change.executionSummary !== undefined &&
                    (summary?.success !== undefined || summary?.executionOrder != null)) {
           panelProvider.updateCellExecState(cell, false);
