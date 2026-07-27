@@ -3,6 +3,13 @@
 All notable changes to NotebookAwesome are documented here.
 This file is generated from [Conventional Commits](https://www.conventionalcommits.org/).
 
+## [0.1.2](https://github.com/royayon/NoteBookAwesome/compare/v0.1.1...v0.1.2) (2026-07-27)
+
+
+### Bug Fixes
+
+* show a left-to-right sweep for every running cell ([ae7a791](https://github.com/royayon/NoteBookAwesome/commit/ae7a791cb4d7c4809b7a8009f21c2a9e8c679b9a))
+
 ## [0.1.1](https://github.com/royayon/NoteBookAwesome/compare/v0.1.0...v0.1.1) (2026-07-27)
 
 
