@@ -1,27 +1,30 @@
 # NotebookAwesome
 
-**The navigation and organization layer your Jupyter notebooks are missing.**
+**Numbered, nameable cell headers for Jupyter notebooks.**
 
-Give every cell a name, a color, and an instant jump target — all stored inside the `.ipynb` file so everything travels with your notebook when you share it or move it to another machine.
+Every cell shows its number automatically, and you can give any cell a real name that appears right above its code — so you always know where you are in a long notebook. Add a color-coded navigator on top, and jumping around a 100-cell notebook stops being a scroll-hunt.
 
 Works in **VS Code**, **Cursor**, **Windsurf**, and every VS Code-compatible editor.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/royayon/NoteBookAwesome/main/images/Navigator.png" alt="NotebookAwesome Cell Navigator panel — grouped cells with names and color tags" width="320" />
+  <img src="https://raw.githubusercontent.com/royayon/NoteBookAwesome/main/images/Cell_Rename.png" alt="A renamed cell header reading '9: Train Test Split'" width="420" />
+  <br/>
+  <img src="https://raw.githubusercontent.com/royayon/NoteBookAwesome/main/images/Cell_Numbering.png" alt="A default cell header reading 'Cell 13'" width="420" />
 </p>
 
 ---
 
 ## Features
 
+### Numbered & renameable cell headers
+The headline feature. Every cell gets a number shown in a header above its code, updated automatically as you add, remove, or reorder cells. Give any cell a meaningful name and it shows in the header (`9: Train Test Split`) and throughout the navigator. Double-click a row in the navigator to rename inline, or use the Command Palette. Names are stored in the `.ipynb`, so they travel with the notebook.
+
 ### Cell Navigator panel
 A sidebar panel that lists every cell in your notebook. Click any row to jump to it instantly. Filter by Code or Markdown, filter by color, search by name or number — the panel keeps up as you work.
 
-### Renameable cell headers
-Give any cell a memorable name. The name appears above the cell code and in the navigator. Double-click a row in the panel to rename it inline, or use the Command Palette. Cells you haven't named show their number automatically.
-
-<img src="https://raw.githubusercontent.com/royayon/NoteBookAwesome/main/images/Cell_Rename.png" alt="A renamed cell header reading '9: Train Test Split'" width="380" />
-<img src="https://raw.githubusercontent.com/royayon/NoteBookAwesome/main/images/Cell_Numbering.png" alt="A default cell header reading 'Cell 13'" width="380" />
+<p align="center">
+  <img src="https://raw.githubusercontent.com/royayon/NoteBookAwesome/main/images/Navigator.png" alt="NotebookAwesome Cell Navigator panel — grouped cells with names and color tags" width="320" />
+</p>
 
 ### Cell color tags
 Tag cells with colors from a customizable palette. A colored dot appears next to each cell in the navigator. Filter the panel down to a single color to focus on just those cells.
