@@ -10,24 +10,23 @@ Works in **VS Code**, **Cursor**, **Windsurf**, and every VS Code-compatible edi
 [![Open VSX](https://img.shields.io/open-vsx/v/royayon/notebookawesome?label=Open%20VSX&color=a60ee5)](https://open-vsx.org/extension/royayon/notebookawesome)
 [![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue.svg)](LICENSE)
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/royayon/NoteBookAwesome/main/images/Navigator.png" alt="NotebookAwesome Cell Navigator — grouped cells with names, numbers, color tags, and run status" width="330" />
-</p>
+
 
 ---
 
-## ✨ Why you'll want it
+## ✨ Features
 
 ### 🔢 Every cell is numbered
 A header above each cell shows its number, updated automatically as you add, remove, or reorder cells. No more "wait, which cell was that?"
+<p align="center">
+  <img src="https://raw.githubusercontent.com/royayon/NoteBookAwesome/main/images/Cell_Numbering.png" alt="An auto-numbered cell header reading 'Cell 13'" width="440" />
+</p>
 
 ### 🏷️ Name the cells that matter
 Give any cell a real name — `9: Train Test Split`, `4: Load Data` — shown in the header and throughout the navigator. Double-click a row to rename inline. Names are saved **inside the `.ipynb`**, so they travel with your notebook.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/royayon/NoteBookAwesome/main/images/Cell_Rename.png" alt="A renamed cell header reading '9: Train Test Split'" width="440" />
-  <br/>
-  <img src="https://raw.githubusercontent.com/royayon/NoteBookAwesome/main/images/Cell_Numbering.png" alt="An auto-numbered cell header reading 'Cell 13'" width="440" />
 </p>
 
 ### ▶️ Custom run sequences — run only the cells you want, in your order
@@ -45,11 +44,23 @@ Define named sequences like `1, 2-5, 8` and run exactly those cells, **in the or
 ### 🧭 A navigator that keeps up
 The sidebar lists every cell with its number and name. **Click any row to jump straight to it.** Search by number or name, filter to just **Code** or **Markdown**, and collapse sections under Markdown headings for a clean outline of huge notebooks.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/royayon/NoteBookAwesome/main/images/Navigator.png" alt="NotebookAwesome Cell Navigator — grouped cells with names, numbers, color tags, and run status" width="330" />
+</p>
+
 ### 🎨 Color-tag and filter
 Tag cells with colors from a customizable palette, then **filter the navigator to a single color** to focus on just those cells — great for marking TODOs, review spots, or pipeline stages.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/royayon/NoteBookAwesome/main/images/Colors.png" alt="Color-tagging cells and filtering the navigator by color" width="330" />
+</p>
+
 ### 📊 Execution status at a glance
 Each code cell shows a run indicator in the navigator: a left-to-right **green sweep** while running, **solid green** on success, **red** on failure — so you can watch a Run All march down your notebook.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/royayon/NoteBookAwesome/main/images/ExecBar.png" alt="Per-cell execution status bars in the navigator — running, success, and failed" width="330" />
+</p>
 
 ### ⌨️ Jump anywhere — `Ctrl+Alt+G`
 A quick-pick of every cell, filterable by number, name, or first line of code. Keyboard-navigable; press Enter to jump.
