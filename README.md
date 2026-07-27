@@ -38,6 +38,10 @@ Define named sequences like `1, 2-5, 8` and run exactly those cells, **in the or
 - Live **progress spinner** while running; a **green box** when it succeeds, **red** if a cell fails (it stops there).
 - Stored in the `.ipynb`, so your sequences travel with the file.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/royayon/NoteBookAwesome/main/images/Runs.png" alt="Custom run sequences — named lists of cells to run in a chosen order" width="330" />
+</p>
+
 ### 🧭 A navigator that keeps up
 The sidebar lists every cell with its number and name. **Click any row to jump straight to it.** Search by number or name, filter to just **Code** or **Markdown**, and collapse sections under Markdown headings for a clean outline of huge notebooks.
 
