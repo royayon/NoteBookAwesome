@@ -6,6 +6,10 @@ import { createHash } from 'crypto';
 type CellMap = Record<string, Record<string, string>>;
 const _cache = new Map<string, CellMap>();
 
+// A named run sequence: an ordered list of cells (by content hash) to execute.
+export type CellSequence = { name: string; cells: string[] };
+const _seqCache = new Map<string, CellSequence[]>();
+
 function cellHash(cell: vscode.NotebookCell): string {
   return createHash('sha1').update(cell.document.getText()).digest('hex').slice(0, 16);
 }
@@ -49,10 +53,12 @@ export async function seedCellPropsFromNotebook(notebook: vscode.NotebookDocumen
   try {
     const bytes = await vscode.workspace.fs.readFile(notebook.uri);
     const ipynb = JSON.parse(new TextDecoder().decode(bytes)) as IpynbRoot;
-    const nba = ipynb.metadata?.[NBA_KEY] as { cells?: CellMap } | undefined;
+    const nba = ipynb.metadata?.[NBA_KEY] as { cells?: CellMap; sequences?: CellSequence[] } | undefined;
     _cache.set(notebook.uri.toString(), nba?.cells ?? {});
+    _seqCache.set(notebook.uri.toString(), Array.isArray(nba?.sequences) ? nba!.sequences : []);
   } catch {
     _cache.set(notebook.uri.toString(), {});
+    _seqCache.set(notebook.uri.toString(), []);
   }
 }
 
@@ -63,13 +69,17 @@ export async function seedCellPropsFromNotebook(notebook: vscode.NotebookDocumen
  */
 export async function injectMetadataIntoFile(notebook: vscode.NotebookDocument): Promise<void> {
   const map = _cache.get(notebook.uri.toString()) ?? {};
+  const sequences = _seqCache.get(notebook.uri.toString()) ?? [];
   try {
     const bytes = await vscode.workspace.fs.readFile(notebook.uri);
     const ipynb = JSON.parse(new TextDecoder().decode(bytes)) as IpynbRoot;
 
     if (!ipynb.metadata) { ipynb.metadata = {}; }
-    if (Object.keys(map).length) {
-      ipynb.metadata[NBA_KEY] = { cells: map };
+    const nba: Record<string, unknown> = {};
+    if (Object.keys(map).length) { nba.cells = map; }
+    if (sequences.length) { nba.sequences = sequences; }
+    if (Object.keys(nba).length) {
+      ipynb.metadata[NBA_KEY] = nba;
     } else {
       delete ipynb.metadata[NBA_KEY];
     }
@@ -123,4 +133,88 @@ export function getActiveCell(): vscode.NotebookCell | undefined {
   const sel = editor.selection;
   if (sel.isEmpty) { return undefined; }
   return editor.notebook.cellAt(sel.start);
+}
+
+// ── Run sequences ────────────────────────────────────────────────────────────
+
+/** Returns a deep copy of the notebook's saved run sequences. */
+export function getSequences(notebook: vscode.NotebookDocument): CellSequence[] {
+  return (_seqCache.get(notebook.uri.toString()) ?? []).map(s => ({ name: s.name, cells: [...s.cells] }));
+}
+
+/** Replaces the notebook's sequences in the cache (persisted to the .ipynb on save). */
+export function setSequences(notebook: vscode.NotebookDocument, sequences: CellSequence[]): void {
+  _seqCache.set(notebook.uri.toString(), sequences.map(s => ({ name: s.name, cells: [...s.cells] })));
+}
+
+/** Maps content hashes → current 0-based cell index. First occurrence wins for identical cells. */
+function buildHashIndex(notebook: vscode.NotebookDocument): Map<string, number> {
+  const index = new Map<string, number>();
+  for (let i = 0; i < notebook.cellCount; i++) {
+    const hash = cellHash(notebook.cellAt(i));
+    if (!index.has(hash)) { index.set(hash, i); }
+  }
+  return index;
+}
+
+export type ParsedNumbers = { numbers: number[]; invalid: string[] };
+
+/**
+ * Parses a user string like "1, 2-5, 8" into an ordered list of 1-based cell
+ * numbers. Ranges expand in the direction written (5-2 → 5,4,3,2). Order and
+ * duplicates are preserved — a sequence may intentionally run a cell twice.
+ * Unrecognized tokens are returned separately in `invalid`.
+ */
+export function parseCellNumbers(input: string): ParsedNumbers {
+  const numbers: number[] = [];
+  const invalid: string[] = [];
+  for (const raw of input.split(',')) {
+    const part = raw.trim();
+    if (!part) { continue; }
+    const range = part.match(/^(\d+)\s*-\s*(\d+)$/);
+    if (range) {
+      const a = parseInt(range[1], 10);
+      const b = parseInt(range[2], 10);
+      if (a <= b) { for (let n = a; n <= b; n++) { numbers.push(n); } }
+      else { for (let n = a; n >= b; n--) { numbers.push(n); } }
+    } else if (/^\d+$/.test(part)) {
+      numbers.push(parseInt(part, 10));
+    } else {
+      invalid.push(part);
+    }
+  }
+  return { numbers, invalid };
+}
+
+/** Converts 1-based cell numbers (as typed) into content hashes for storage. */
+export function hashesFromPositions(notebook: vscode.NotebookDocument, positions: number[]): string[] {
+  const hashes: string[] = [];
+  for (const pos of positions) {
+    const idx = pos - 1;
+    if (idx >= 0 && idx < notebook.cellCount) {
+      hashes.push(cellHash(notebook.cellAt(idx)));
+    }
+  }
+  return hashes;
+}
+
+export type ResolvedSequence = {
+  /** Current 0-based indices of the cells that still exist, in sequence order. */
+  indices: number[];
+  /** Per-entry current 1-based position, or null if that cell was deleted. */
+  positions: (number | null)[];
+  /** Count of entries whose cell no longer exists. */
+  missing: number;
+};
+
+/** Resolves a stored sequence against the notebook's current cells. */
+export function resolveSequence(notebook: vscode.NotebookDocument, seq: CellSequence): ResolvedSequence {
+  const index = buildHashIndex(notebook);
+  const positions = seq.cells.map(hash => {
+    const i = index.get(hash);
+    return i === undefined ? null : i + 1;
+  });
+  const indices = positions.filter((p): p is number => p !== null).map(p => p - 1);
+  const missing = positions.filter(p => p === null).length;
+  return { indices, positions, missing };
 }
