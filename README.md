@@ -6,12 +6,9 @@ Big notebooks turn into a scroll-hunt fast. NotebookAwesome gives every cell a *
 
 Works in **VS Code**, **Cursor**, **Windsurf**, and every VS Code-compatible editor. Free and open source.
 
-[![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/royayon.notebookawesome?label=VS%20Code%20Marketplace&logo=visualstudiocode&color=2b7cd3)](https://marketplace.visualstudio.com/items?itemName=royayon.notebookawesome)
-[![Installs](https://img.shields.io/visual-studio-marketplace/i/royayon.notebookawesome?label=installs&color=2b7cd3)](https://marketplace.visualstudio.com/items?itemName=royayon.notebookawesome)
+[![VS Code Marketplace](https://img.shields.io/badge/VS%20Code%20Marketplace-install-2b7cd3?logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=royayon.notebookawesome)
 [![Open VSX](https://img.shields.io/open-vsx/v/royayon/notebookawesome?label=Open%20VSX&color=a60ee5)](https://open-vsx.org/extension/royayon/notebookawesome)
 [![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue.svg)](LICENSE)
-
-> **Install in 5 seconds** — press `Ctrl+P` (`Cmd+P` on macOS), paste `ext install royayon.notebookawesome`, hit Enter. Or search **NotebookAwesome** in the Extensions panel (`Ctrl+Shift+X`).
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/royayon/NoteBookAwesome/main/images/Navigator.png" alt="NotebookAwesome Cell Navigator — grouped cells with names, numbers, color tags, and run status" width="330" />
