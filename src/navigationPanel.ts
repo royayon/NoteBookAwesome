@@ -26,14 +26,7 @@ export class NavigationPanelProvider implements vscode.WebviewViewProvider, vsco
     } else {
       this._runningCells.delete(key);
     }
-    let state = '';
-    if (running) {
-      state = 'running';
-    } else if (cell.executionSummary?.success === true) {
-      state = 'success';
-    } else if (cell.executionSummary?.success === false) {
-      state = 'failed';
-    }
+    const state = computeExecState(cell, running);
     this._view?.webview.postMessage({ type: 'setExecState', index: cell.index, state });
   }
 
@@ -93,9 +86,29 @@ export class NavigationPanelProvider implements vscode.WebviewViewProvider, vsco
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
 function execState(cell: vscode.NotebookCell, runningCells: Set<string>): string {
-  if (runningCells.has(`${cell.notebook.uri}#${cell.index}`)) { return 'running'; }
-  if (cell.executionSummary?.success === true)  { return 'success'; }
-  if (cell.executionSummary?.success === false) { return 'failed'; }
+  const running = runningCells.has(`${cell.notebook.uri}#${cell.index}`);
+  return computeExecState(cell, running);
+}
+
+function cellHasErrorOutput(cell: vscode.NotebookCell): boolean {
+  return cell.outputs.some(o => o.items.some(i => i.mime === 'application/vnd.code.notebook.error'));
+}
+
+/**
+ * Resolves a cell's exec-bar state. `executionSummary.success` is unreliable —
+ * VS Code often leaves it undefined for cells that ran fine, and it is never
+ * restored when a notebook reopens. `executionOrder` (the [N] count) is set
+ * whenever a cell has run and is persisted in the .ipynb, so we fall back to it
+ * and treat an error output as the failure signal.
+ */
+function computeExecState(cell: vscode.NotebookCell, running: boolean): string {
+  if (running) { return 'running'; }
+  const summary = cell.executionSummary;
+  if (summary?.success === false) { return 'failed'; }
+  if (summary?.success === true)  { return 'success'; }
+  if (summary?.executionOrder != null) {
+    return cellHasErrorOutput(cell) ? 'failed' : 'success';
+  }
   return '';
 }
 
