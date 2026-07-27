@@ -3,6 +3,13 @@
 All notable changes to NotebookAwesome are documented here.
 This file is generated from [Conventional Commits](https://www.conventionalcommits.org/).
 
+## [0.1.1](https://github.com/royayon/NoteBookAwesome/compare/v0.1.0...v0.1.1) (2026-07-27)
+
+
+### Bug Fixes
+
+* derive exec-bar state from execution order, not just success flag ([aebd053](https://github.com/royayon/NoteBookAwesome/commit/aebd05319c04a221e3203489591f713fa9b0f454))
+
 ## 0.1.0 (2026-07-23)
 
 

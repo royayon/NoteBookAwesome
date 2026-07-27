@@ -2,7 +2,7 @@
   "name": "notebookawesome",
   "displayName": "NotebookAwesome",
   "description": "Cell numbering, renameable headers, and a navigation panel for Jupyter notebooks. Works in VS Code, Cursor, Windsurf, and all VS Code-compatible editors.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "royayon",
   "license": "GPL-3.0-or-later",
   "repository": {
