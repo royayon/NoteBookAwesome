@@ -1,117 +1,97 @@
 # NotebookAwesome
 
-**Numbered, nameable cell headers for Jupyter notebooks.**
+### Numbered, nameable cell headers · a color-coded navigator · custom run order — for Jupyter notebooks.
 
-Every cell shows its number automatically, and you can give any cell a real name that appears right above its code — so you always know where you are in a long notebook. Add a color-coded navigator on top, and jumping around a 100-cell notebook stops being a scroll-hunt.
+Big notebooks turn into a scroll-hunt fast. NotebookAwesome gives every cell a **number** and an optional **name** right in its header, a **sidebar navigator** to jump anywhere in one click, **color tags** to group your work, and **custom run sequences** so you can execute just the cells you want, in the order you want.
 
-Works in **VS Code**, **Cursor**, **Windsurf**, and every VS Code-compatible editor.
+Works in **VS Code**, **Cursor**, **Windsurf**, and every VS Code-compatible editor. Free and open source.
+
+[![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/royayon.notebookawesome?label=VS%20Code%20Marketplace&logo=visualstudiocode&color=2b7cd3)](https://marketplace.visualstudio.com/items?itemName=royayon.notebookawesome)
+[![Installs](https://img.shields.io/visual-studio-marketplace/i/royayon.notebookawesome?label=installs&color=2b7cd3)](https://marketplace.visualstudio.com/items?itemName=royayon.notebookawesome)
+[![Open VSX](https://img.shields.io/open-vsx/v/royayon/notebookawesome?label=Open%20VSX&color=a60ee5)](https://open-vsx.org/extension/royayon/notebookawesome)
+[![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue.svg)](LICENSE)
+
+> **Install in 5 seconds** — press `Ctrl+P` (`Cmd+P` on macOS), paste `ext install royayon.notebookawesome`, hit Enter. Or search **NotebookAwesome** in the Extensions panel (`Ctrl+Shift+X`).
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/royayon/NoteBookAwesome/main/images/Cell_Rename.png" alt="A renamed cell header reading '9: Train Test Split'" width="420" />
+  <img src="https://raw.githubusercontent.com/royayon/NoteBookAwesome/main/images/Navigator.png" alt="NotebookAwesome Cell Navigator — grouped cells with names, numbers, color tags, and run status" width="330" />
+</p>
+
+---
+
+## ✨ Why you'll want it
+
+### 🔢 Every cell is numbered
+A header above each cell shows its number, updated automatically as you add, remove, or reorder cells. No more "wait, which cell was that?"
+
+### 🏷️ Name the cells that matter
+Give any cell a real name — `9: Train Test Split`, `4: Load Data` — shown in the header and throughout the navigator. Double-click a row to rename inline. Names are saved **inside the `.ipynb`**, so they travel with your notebook.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/royayon/NoteBookAwesome/main/images/Cell_Rename.png" alt="A renamed cell header reading '9: Train Test Split'" width="440" />
   <br/>
-  <img src="https://raw.githubusercontent.com/royayon/NoteBookAwesome/main/images/Cell_Numbering.png" alt="A default cell header reading 'Cell 13'" width="420" />
+  <img src="https://raw.githubusercontent.com/royayon/NoteBookAwesome/main/images/Cell_Numbering.png" alt="An auto-numbered cell header reading 'Cell 13'" width="440" />
 </p>
+
+### ▶️ Custom run sequences — run only the cells you want, in your order
+Define named sequences like `1, 2-5, 8` and run exactly those cells, **in the order you list them**, with one click. Perfect for a quick smoke test, re-running just your model pipeline, or skipping the slow setup cells.
+
+- Ranges supported (`2-5`) and any custom order (`8, 3, 1`).
+- Each sequence is **bound to its cells** (not brittle line numbers) — reorder your notebook and the sequence still runs the right cells.
+- Live **progress spinner** while running; a **green box** when it succeeds, **red** if a cell fails (it stops there).
+- Stored in the `.ipynb`, so your sequences travel with the file.
+
+### 🧭 A navigator that keeps up
+The sidebar lists every cell with its number and name. **Click any row to jump straight to it.** Search by number or name, filter to just **Code** or **Markdown**, and collapse sections under Markdown headings for a clean outline of huge notebooks.
+
+### 🎨 Color-tag and filter
+Tag cells with colors from a customizable palette, then **filter the navigator to a single color** to focus on just those cells — great for marking TODOs, review spots, or pipeline stages.
+
+### 📊 Execution status at a glance
+Each code cell shows a run indicator in the navigator: a left-to-right **green sweep** while running, **solid green** on success, **red** on failure — so you can watch a Run All march down your notebook.
+
+### ⌨️ Jump anywhere — `Ctrl+Alt+G`
+A quick-pick of every cell, filterable by number, name, or first line of code. Keyboard-navigable; press Enter to jump.
+
+### 💾 Everything travels with the file
+Names, colors, and run sequences are stored in the notebook's own metadata (`notebook.metadata.notebookawesome`) — no sidecar files, no cloud sync. Copy the `.ipynb` to another machine with the extension and it's all there.
+
+### 🔌 Works everywhere VS Code does
+Built on the standard extension API only — no Microsoft-proprietary calls — so it runs identically in VS Code, Cursor, Windsurf, VSCodium, and other forks.
 
 ---
 
-## Features
+## 🚀 Install
 
-### Numbered & renameable cell headers
-The headline feature. Every cell gets a number shown in a header above its code, updated automatically as you add, remove, or reorder cells. Give any cell a meaningful name and it shows in the header (`9: Train Test Split`) and throughout the navigator. Double-click a row in the navigator to rename inline, or use the Command Palette. Names are stored in the `.ipynb`, so they travel with the notebook.
+**VS Code / Cursor / Windsurf:** open Extensions (`Ctrl+Shift+X`), search **NotebookAwesome**, click **Install**.
+Or quick-open (`Ctrl+P`) and run `ext install royayon.notebookawesome`.
 
-### Cell Navigator panel
-A sidebar panel that lists every cell in your notebook. Click any row to jump to it instantly. Filter by Code or Markdown, filter by color, search by name or number — the panel keeps up as you work.
+**Open VSX (Cursor, Windsurf, VSCodium):** [open-vsx.org/extension/royayon/notebookawesome](https://open-vsx.org/extension/royayon/notebookawesome)
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/royayon/NoteBookAwesome/main/images/Navigator.png" alt="NotebookAwesome Cell Navigator panel — grouped cells with names and color tags" width="320" />
-</p>
+**Manual:** grab the latest `.vsix` from [Releases](https://github.com/royayon/NoteBookAwesome/releases) and run `code --install-extension notebookawesome-*.vsix`.
 
-### Cell color tags
-Tag cells with colors from a customizable palette. A colored dot appears next to each cell in the navigator. Filter the panel down to a single color to focus on just those cells.
+---
 
-### Execution state bar
-A thin bar below each code cell row in the navigator shows its execution state at a glance:
+## 🕹️ Quick start
 
-| State | Appearance |
+| Do this | How |
 |---|---|
-| Not run | Gray bar |
-| Running | Pulsing green animation |
-| Success | Solid green |
-| Failed | Solid red |
-
-### Jump to cell — `Ctrl+Alt+G`
-A quick-pick menu that filters all cells by number, name, or first line of code. Keyboard-navigable; press Enter to jump.
-
-### Grouping by Markdown headings
-Markdown cells act as collapsible section headers. Code cells between two headings are grouped under the first, keeping the navigator compact for large notebooks.
-
-### Portable metadata
-Names and colors are stored in `notebook.metadata.notebookawesome` inside the `.ipynb` file. They travel with the notebook when you copy it, share it, or open it on a different machine — no extra files required.
+| Open the navigator | Click the **notebook icon** in the Activity Bar |
+| Jump to a cell | **Click** its row in the navigator |
+| Rename a cell | **Double-click** its row, or `Ctrl+Shift+P` → *NotebookAwesome: Rename Cell* |
+| Color a cell | Click the **●** dot on its row, pick a color |
+| Filter by color | Click **● Color** in the toolbar, pick a swatch |
+| Show only Code / Markdown | Click **Code** or **MD** in the toolbar |
+| Build a run sequence | Click **▶ Runs** → **+ Add run sequence**, type `1, 2-5, 8`, name it, hit ▶ |
+| Jump-to-cell palette | `Ctrl+Alt+G` |
 
 ---
 
-## Installation
+## ⚙️ Configuration
 
-### VS Code Marketplace
-Search **NotebookAwesome** in the Extensions panel (`Ctrl+Shift+X`) and click Install.
+Customize the color palette in `settings.json`:
 
-### Open VSX (Cursor, Windsurf, and other forks)
-Search **NotebookAwesome** in your editor's Extensions panel, or visit [open-vsx.org](https://open-vsx.org/extension/royayon/notebookawesome).
-
-### Manual install
-1. Download the latest `.vsix` from [Releases](https://github.com/royayon/NoteBookAwesome/releases)
-2. `code --install-extension notebookawesome-*.vsix`
-
----
-
-## Usage
-
-### Rename a cell
-- **Double-click** any row label in the Cell Navigator panel, or
-- `Ctrl+Shift+P` → **NotebookAwesome: Rename Cell**
-
-### Set a cell color
-- Click the **●** dot on the right side of any row in the navigator
-- Pick a color from the popup; click the dot again to clear it
-
-### Navigate
-- Open the **Cell Navigator** from the Activity Bar (notebook icon)
-- Click any row to jump to that cell
-
-### Filter and search
-- Type in the search box to filter by cell number or name
-- Click **Code** or **MD** to show only that type
-- Click the **Color** button to open the palette strip and filter by color
-
-### Jump anywhere — `Ctrl+Alt+G`
-Opens a quick-pick with all cells. Type a number, name, or first line of code to narrow down, then press Enter.
-
----
-
-## How metadata is stored
-
-Names and colors live at `notebook.metadata.notebookawesome.cells` in the `.ipynb` JSON — the same file you already version-control and share. No sidecar files, no cloud sync, no editor-specific storage.
-
-```json
-"metadata": {
-  "kernelspec": { "..." },
-  "notebookawesome": {
-    "cells": {
-      "<content-hash>": { "name": "Feature Engineering", "color": "#4caf6e" }
-    }
-  }
-}
-```
-
-Keys are SHA-1 hashes of each cell's content, so renaming or reordering cells doesn't lose their metadata.
-
----
-
-## Configuration
-
-Add to your `settings.json` to customize the color palette:
-
-```json
+```jsonc
 "notebookawesome.colorPalette": [
   { "name": "Red",    "color": "#e05252" },
   { "name": "Green",  "color": "#4caf6e" },
@@ -122,16 +102,34 @@ Add to your `settings.json` to customize the color palette:
 
 ---
 
-## Contributing
+## 💾 How your data is stored
 
-1. Fork the repo and create a branch
-2. `npm install` then `npm run watch` to compile on change
-3. Press `F5` in VS Code to launch the Extension Development Host
-4. Open any `.ipynb` file and test your changes
-5. Open a PR — contributions welcome
+Names, colors, and run sequences live in the `.ipynb`'s own metadata — the same file you already version-control:
+
+```jsonc
+"metadata": {
+  "notebookawesome": {
+    "cells":     { "<content-hash>": { "name": "Feature Engineering", "color": "Green" } },
+    "sequences": [ { "name": "Smoke test", "cells": ["<hash>", "<hash>", "<hash>"] } ]
+  }
+}
+```
+
+Keys are content hashes of each cell, so renaming or reordering cells never loses their metadata.
 
 ---
 
-## License
+## 🤝 Contributing
+
+Issues and PRs welcome!
+
+1. Fork and branch.
+2. `npm install`, then `npm run watch` to compile on change.
+3. Press `F5` to launch the Extension Development Host and open any `.ipynb`.
+4. Open a PR.
+
+---
+
+## 📄 License
 
 [GPL-3.0-or-later](LICENSE) © royayon
