@@ -3,6 +3,19 @@
 All notable changes to NotebookAwesome are documented here.
 This file is generated from [Conventional Commits](https://www.conventionalcommits.org/).
 
+## [0.2.0](https://github.com/royayon/NoteBookAwesome/compare/v0.1.2...v0.2.0) (2026-07-27)
+
+
+### Features
+
+* add run-sequence data model (parse ranges, resolve hashes, persist in .ipynb) ([62eb4e8](https://github.com/royayon/NoteBookAwesome/commit/62eb4e829e393e9a5a84cec6d2bb6a090b21e5d3))
+* run cells in a custom order from named sequences in the nav panel ([5872a48](https://github.com/royayon/NoteBookAwesome/commit/5872a48fe48ed8f421936ffdbfe5102f20dc7645))
+
+
+### Bug Fixes
+
+* don't show the running sweep for a bulk Clear All Outputs ([768bb4f](https://github.com/royayon/NoteBookAwesome/commit/768bb4f7948776cbf38b53cb7bca7e047bf3c4d2))
+
 ## [0.1.2](https://github.com/royayon/NoteBookAwesome/compare/v0.1.1...v0.1.2) (2026-07-27)
 
 
