@@ -255,14 +255,20 @@ function buildHtml(cells: vscode.NotebookCell[], grouped: boolean, paletteEntrie
   .empty { padding: 16px 10px; color: var(--vscode-descriptionForeground); font-style: italic; font-size: 12px; text-align: center; }
 
   /* execution state indicator — short bar on right side, code cells only */
-  .exec-bar { flex-shrink: 0; width: 18px; height: 2px; border-radius: 2px; background: rgba(128,128,128,0.22); }
-  .exec-spacer { flex-shrink: 0; width: 18px; }
-  .row[data-exec="running"] .exec-bar { background: #4ade80; animation: nba-pulse 0.9s ease-in-out infinite; }
-  .row[data-exec="success"] .exec-bar { background: rgba(74,222,128,0.8); }
+  .exec-bar { position: relative; overflow: hidden; flex-shrink: 0; width: 26px; height: 3px; border-radius: 2px; background: rgba(128,128,128,0.22); }
+  .exec-spacer { flex-shrink: 0; width: 26px; }
+  /* running: a green segment sweeps left→right over a faint green track */
+  .row[data-exec="running"] .exec-bar { background: rgba(74,222,128,0.18); }
+  .row[data-exec="running"] .exec-bar::before {
+    content: ""; position: absolute; top: 0; left: 0; height: 100%; width: 55%;
+    border-radius: 2px; background: #4ade80;
+    animation: nba-sweep 0.9s linear infinite;
+  }
+  .row[data-exec="success"] .exec-bar { background: rgba(74,222,128,0.85); }
   .row[data-exec="failed"]  .exec-bar { background: rgba(248,113,113,0.9); }
-  @keyframes nba-pulse {
-    0%, 100% { opacity: 0.35; }
-    50%       { opacity: 1; box-shadow: 0 0 5px rgba(74,222,128,0.7); }
+  @keyframes nba-sweep {
+    0%   { transform: translateX(-110%); }
+    100% { transform: translateX(210%); }
   }
 
   .color-popup { position: fixed; display: none; align-items: center; gap: 4px; padding: 5px 8px; background: var(--vscode-quickInput-background, #1e1e1e); border: 1px solid var(--vscode-focusBorder, #007fd4); border-radius: 8px; z-index: 1000; box-shadow: 0 4px 14px rgba(0,0,0,0.5); }

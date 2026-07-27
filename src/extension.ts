@@ -59,10 +59,12 @@ export function activate(context: vscode.ExtensionContext): void {
       for (const change of e.cellChanges) {
         const cell = change.cell;
         const summary = cell.executionSummary;
-        const finished = summary?.success !== undefined || summary?.executionOrder != null;
-        if (change.outputs !== undefined && change.outputs.length === 0 && !finished) {
+        // Cleared outputs = execution just (re)started → show the running animation.
+        // A stale executionOrder from a previous run must NOT suppress this.
+        if (change.outputs !== undefined && change.outputs.length === 0) {
           panelProvider.updateCellExecState(cell, true);
-        } else if (change.executionSummary !== undefined && finished) {
+        } else if (change.executionSummary !== undefined &&
+                   (summary?.success !== undefined || summary?.executionOrder != null)) {
           panelProvider.updateCellExecState(cell, false);
         }
       }
