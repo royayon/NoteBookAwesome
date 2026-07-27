@@ -1,6 +1,16 @@
 # NotebookAwesome
 
-### Numbered, nameable cell headers · a color-coded navigator · custom run order — for Jupyter notebooks.
+**Cell numbering, naming, navigation, and custom run order — for Jupyter notebooks.**
+
+<p align="center">
+  <img alt="Numbered headers" src="https://img.shields.io/badge/%23%EF%B8%8F%E2%83%A3_Numbered_headers-2b7cd3?style=for-the-badge" />
+  <img alt="Nameable cells" src="https://img.shields.io/badge/%F0%9F%8F%B7%EF%B8%8F_Nameable_cells-4a90d9?style=for-the-badge" />
+  <img alt="Custom run order" src="https://img.shields.io/badge/%E2%96%B6%EF%B8%8F_Custom_run_order-9b6dd6?style=for-the-badge" />
+  <br/>
+  <img alt="Cell navigator" src="https://img.shields.io/badge/%F0%9F%A7%AD_Cell_navigator-4caf6e?style=for-the-badge" />
+  <img alt="Color tags" src="https://img.shields.io/badge/%F0%9F%8E%A8_Color_tags-d4a017?style=for-the-badge" />
+  <img alt="Execution status" src="https://img.shields.io/badge/%F0%9F%93%8A_Execution_status-e08a3c?style=for-the-badge" />
+</p>
 
 Big notebooks turn into a scroll-hunt fast. NotebookAwesome gives every cell a **number** and an optional **name** right in its header, a **sidebar navigator** to jump anywhere in one click, **color tags** to group your work, and **custom run sequences** so you can execute just the cells you want, in the order you want.
 
