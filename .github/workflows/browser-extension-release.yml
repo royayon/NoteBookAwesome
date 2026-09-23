@@ -54,8 +54,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
-      CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
-      CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
       CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
     steps:
       - uses: actions/download-artifact@v4
@@ -63,13 +61,13 @@ jobs:
           name: browser-extension-zip
       - name: Publish to Chrome Web Store
         if: ${{ env.CHROME_CLIENT_ID != '' && env.CHROME_EXTENSION_ID != '' }}
-        uses: tristan255/action-chrome-extension-deploy@v2
+        uses: cardinalby/chrome-extension-upload-action@v2
         with:
-          client-id: ${{ secrets.CHROME_CLIENT_ID }}
-          client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}
-          refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}
-          extension-id: ${{ secrets.CHROME_EXTENSION_ID }}
-          file-name: notebookawesome-browser-extension.zip
+          clientId: ${{ secrets.CHROME_CLIENT_ID }}
+          clientSecret: ${{ secrets.CHROME_CLIENT_SECRET }}
+          refreshToken: ${{ secrets.CHROME_REFRESH_TOKEN }}
+          extensionId: ${{ secrets.CHROME_EXTENSION_ID }}
+          filePath: notebookawesome-browser-extension.zip
 
   publish-edge-addons:
     needs: package-browser-extension
@@ -82,29 +80,28 @@ jobs:
           name: browser-extension-zip
       - name: Publish to Microsoft Edge Add-ons
         if: ${{ env.EDGE_PRODUCT_ID != '' }}
-        uses: wxt-dev/deploy-action@v1
+        uses: cardinalby/edge-addon-deploy-action@v1
         with:
-          target: edge
-          zip: notebookawesome-browser-extension.zip
-          edge-product-id: ${{ secrets.EDGE_PRODUCT_ID }}
-          edge-client-id: ${{ secrets.EDGE_CLIENT_ID }}
-          edge-client-secret: ${{ secrets.EDGE_CLIENT_SECRET }}
-          edge-tenant-id: ${{ secrets.EDGE_TENANT_ID }}
+          productId: ${{ secrets.EDGE_PRODUCT_ID }}
+          clientId: ${{ secrets.EDGE_CLIENT_ID }}
+          clientSecret: ${{ secrets.EDGE_CLIENT_SECRET }}
+          tenantId: ${{ secrets.EDGE_TENANT_ID }}
+          zipFilePath: notebookawesome-browser-extension.zip
 
   publish-firefox-addons:
     needs: package-browser-extension
     runs-on: ubuntu-latest
     env:
       FIREFOX_API_KEY: ${{ secrets.FIREFOX_API_KEY }}
+      FIREFOX_API_SECRET: ${{ secrets.FIREFOX_API_SECRET }}
     steps:
       - uses: actions/download-artifact@v4
         with:
           name: browser-extension-zip
       - name: Publish to Firefox Add-ons (AMO)
-        if: ${{ env.FIREFOX_API_KEY != '' }}
-        uses: wxt-dev/deploy-action@v1
+        if: ${{ env.FIREFOX_API_KEY != '' && env.FIREFOX_API_SECRET != '' }}
+        uses: cardinalby/webext-buildtools-deploy-firefox-addon-action@v2
         with:
-          target: firefox
-          zip: notebookawesome-browser-extension.zip
-          firefox-api-key: ${{ secrets.FIREFOX_API_KEY }}
-          firefox-api-secret: ${{ secrets.FIREFOX_API_SECRET }}
+          zipFilePath: notebookawesome-browser-extension.zip
+          apiKey: ${{ secrets.FIREFOX_API_KEY }}
+          apiSecret: ${{ secrets.FIREFOX_API_SECRET }}
