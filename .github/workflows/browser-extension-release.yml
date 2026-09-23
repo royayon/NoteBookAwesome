@@ -2,7 +2,7 @@ name: Browser Extension Release
 
 # Runs automatically on tag push (v*) or manual workflow dispatch.
 # Packages the browser extension into a store-ready ZIP and deploys to
-# Chrome Web Store, Microsoft Edge Add-ons, and Firefox Add-ons (AMO).
+# Chrome Web Store and Firefox Add-ons (AMO).
 on:
   push:
     tags:
@@ -53,24 +53,24 @@ jobs:
     needs: package-browser-extension
     runs-on: ubuntu-latest
     env:
+      EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
       CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
       CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
       REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
-      EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
     steps:
       - uses: actions/download-artifact@v4
         with:
           name: browser-extension-zip
       - name: Publish to Chrome Web Store
-        if: ${{ env.CLIENT_ID != '' && env.EXTENSION_ID != '' }}
-        run: npx chrome-webstore-upload-cli upload --source notebookawesome-browser-extension.zip --auto-publish
+        if: ${{ env.EXTENSION_ID != '' && env.CLIENT_ID != '' }}
+        run: npx chrome-webstore-upload-cli@3 upload --source notebookawesome-browser-extension.zip --extension-id "$EXTENSION_ID" --client-id "$CLIENT_ID" --client-secret "$CLIENT_SECRET" --refresh-token "$REFRESH_TOKEN" --auto-publish
 
   publish-firefox-addons:
     needs: package-browser-extension
     runs-on: ubuntu-latest
     env:
-      FIREFOX_API_KEY: ${{ secrets.FIREFOX_API_KEY }}
-      FIREFOX_API_SECRET: ${{ secrets.FIREFOX_API_SECRET }}
+      WEB_EXT_API_KEY: ${{ secrets.FIREFOX_API_KEY }}
+      WEB_EXT_API_SECRET: ${{ secrets.FIREFOX_API_SECRET }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -84,7 +84,7 @@ jobs:
           npm ci
           npm run build
       - name: Publish to Firefox Add-ons (AMO)
-        if: ${{ env.FIREFOX_API_KEY != '' && env.FIREFOX_API_SECRET != '' }}
+        if: ${{ env.WEB_EXT_API_KEY != '' && env.WEB_EXT_API_SECRET != '' }}
         run: |
           cd browser-extension
-          npx web-ext sign --api-key "$FIREFOX_API_KEY" --api-secret "$FIREFOX_API_SECRET"
+          npx web-ext sign --source-dir . --channel listed --api-key "$WEB_EXT_API_KEY" --api-secret "$WEB_EXT_API_SECRET" --no-input
