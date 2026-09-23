@@ -30,23 +30,52 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # Node 20 (not 18): @vscode/vsce -> cheerio -> undici@7 needs the global
-      # File API added in Node 20. Only the toolchain needs this; the extension
-      # itself still targets VS Code 1.70.
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
       - run: npm ci
-      - name: Typecheck
+      - name: Typecheck VS Code Extension
         run: npm run compile
-      - name: Package extension
+      - name: Package VS Code extension
         run: npx @vscode/vsce package -o notebookawesome.vsix
       - name: Upload VSIX artifact
         uses: actions/upload-artifact@v4
         with:
           name: vsix
           path: notebookawesome.vsix
+          retention-days: 7
+
+  package-browser-extension:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: browser-extension/package-lock.json
+
+      - name: Install browser extension dependencies
+        run: |
+          cd browser-extension
+          npm ci
+
+      - name: Typecheck browser extension
+        run: |
+          cd browser-extension
+          npm run compile
+
+      - name: Package browser extension ZIP
+        run: |
+          cd browser-extension
+          npm run pack
+
+      - name: Upload Browser Extension Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-extension-zip
+          path: browser-extension/notebookawesome-browser-extension.zip
           retention-days: 7
 
   publish-vscode:
@@ -93,7 +122,7 @@ jobs:
           OVSX_PAT: ${{ secrets.OVSX_PAT }}
 
   github-release:
-    needs: [publish-vscode, publish-openvsx]
+    needs: [publish-vscode, publish-openvsx, package-browser-extension]
     if: github.event_name == 'push' # only cut a Release for real tag runs
     runs-on: ubuntu-latest
     steps:
@@ -101,7 +130,10 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: vsix
+      - uses: actions/download-artifact@v4
+        with:
+          name: browser-extension-zip
       - name: Create GitHub Release
-        run: gh release create "${{ github.ref_name }}" notebookawesome.vsix --title "${{ github.ref_name }}" --generate-notes
+        run: gh release create "${{ github.ref_name }}" notebookawesome.vsix notebookawesome-browser-extension.zip --title "${{ github.ref_name }}" --generate-notes
         env:
           GH_TOKEN: ${{ github.token }}

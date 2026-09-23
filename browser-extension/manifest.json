@@ -1,0 +1,54 @@
+{
+  "manifest_version": 3,
+  "name": "NotebookAwesome - Colab & Jupyter",
+  "version": "0.1.0",
+  "description": "Numbered headers, cell names, cell navigator sidebar, and custom run sequences for Google Colab and Jupyter Notebooks.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "NotebookAwesome",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "dist/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://colab.research.google.com/*",
+        "http://localhost/*",
+        "http://127.0.0.1/*",
+        "https://localhost/*",
+        "https://127.0.0.1/*"
+      ],
+      "js": ["dist/contentScript.js"],
+      "css": ["dist/styles.css"],
+      "run_at": "document_end"
+    }
+  ],
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://colab.research.google.com/*",
+    "http://localhost/*",
+    "http://127.0.0.1/*",
+    "https://localhost/*",
+    "https://127.0.0.1/*"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["dist/*", "icons/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

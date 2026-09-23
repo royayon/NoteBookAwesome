@@ -1,0 +1,101 @@
+name: Browser Extension Release
+
+# Runs automatically on tag push (v*) or manual workflow dispatch.
+# Packages the browser extension into a store-ready ZIP and deploys to
+# Chrome Web Store, Microsoft Edge Add-ons, and Firefox Add-ons (AMO).
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: browser-extension-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  package-browser-extension:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: browser-extension/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd browser-extension
+          npm ci
+
+      - name: Typecheck
+        run: |
+          cd browser-extension
+          npm run compile
+
+      - name: Package extension ZIP
+        run: |
+          cd browser-extension
+          npm run pack
+
+      - name: Upload Browser Extension ZIP Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-extension-zip
+          path: browser-extension/notebookawesome-browser-extension.zip
+          retention-days: 7
+
+  publish-chrome-web-store:
+    needs: package-browser-extension
+    if: github.event_name == 'push' && secrets.CHROME_CLIENT_ID != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: browser-extension-zip
+      - name: Publish to Chrome Web Store
+        uses: tristan255/action-chrome-extension-deploy@v2
+        with:
+          client-id: ${{ secrets.CHROME_CLIENT_ID }}
+          client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}
+          refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}
+          extension-id: ${{ secrets.CHROME_EXTENSION_ID }}
+          file-name: notebookawesome-browser-extension.zip
+
+  publish-edge-addons:
+    needs: package-browser-extension
+    if: github.event_name == 'push' && secrets.EDGE_PRODUCT_ID != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: browser-extension-zip
+      - name: Publish to Microsoft Edge Add-ons
+        uses: wxt-dev/deploy-action@v1
+        with:
+          target: edge
+          zip: notebookawesome-browser-extension.zip
+          edge-product-id: ${{ secrets.EDGE_PRODUCT_ID }}
+          edge-client-id: ${{ secrets.EDGE_CLIENT_ID }}
+          edge-client-secret: ${{ secrets.EDGE_CLIENT_SECRET }}
+          edge-tenant-id: ${{ secrets.EDGE_TENANT_ID }}
+
+  publish-firefox-addons:
+    needs: package-browser-extension
+    if: github.event_name == 'push' && secrets.FIREFOX_API_KEY != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: browser-extension-zip
+      - name: Publish to Firefox Add-ons (AMO)
+        uses: wxt-dev/deploy-action@v1
+        with:
+          target: firefox
+          zip: notebookawesome-browser-extension.zip
+          firefox-api-key: ${{ secrets.FIREFOX_API_KEY }}
+          firefox-api-secret: ${{ secrets.FIREFOX_API_SECRET }}

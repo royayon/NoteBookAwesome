@@ -2,6 +2,7 @@ node_modules/
 out/
 dist/
 *.vsix
+*.zip
 .env
 .DS_Store
 Thumbs.db
