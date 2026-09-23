@@ -53,21 +53,17 @@ jobs:
     needs: package-browser-extension
     runs-on: ubuntu-latest
     env:
-      CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
-      CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+      CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
+      CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
+      REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+      EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
     steps:
       - uses: actions/download-artifact@v4
         with:
           name: browser-extension-zip
       - name: Publish to Chrome Web Store
-        if: ${{ env.CHROME_CLIENT_ID != '' && env.CHROME_EXTENSION_ID != '' }}
-        uses: cardinalby/chrome-extension-upload-action@v1
-        with:
-          clientId: ${{ secrets.CHROME_CLIENT_ID }}
-          clientSecret: ${{ secrets.CHROME_CLIENT_SECRET }}
-          refreshToken: ${{ secrets.CHROME_REFRESH_TOKEN }}
-          extensionId: ${{ secrets.CHROME_EXTENSION_ID }}
-          filePath: notebookawesome-browser-extension.zip
+        if: ${{ env.CLIENT_ID != '' && env.EXTENSION_ID != '' }}
+        run: npx chrome-webstore-upload-cli upload --source notebookawesome-browser-extension.zip --auto-publish
 
   publish-firefox-addons:
     needs: package-browser-extension
@@ -76,13 +72,19 @@ jobs:
       FIREFOX_API_KEY: ${{ secrets.FIREFOX_API_KEY }}
       FIREFOX_API_SECRET: ${{ secrets.FIREFOX_API_SECRET }}
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          name: browser-extension-zip
+          node-version: 20
+          cache: npm
+          cache-dependency-path: browser-extension/package-lock.json
+      - name: Install dependencies and build
+        run: |
+          cd browser-extension
+          npm ci
+          npm run build
       - name: Publish to Firefox Add-ons (AMO)
         if: ${{ env.FIREFOX_API_KEY != '' && env.FIREFOX_API_SECRET != '' }}
-        uses: cardinalby/webext-buildtools-deploy-firefox-addon-action@v1
-        with:
-          zipFilePath: notebookawesome-browser-extension.zip
-          apiKey: ${{ secrets.FIREFOX_API_KEY }}
-          apiSecret: ${{ secrets.FIREFOX_API_SECRET }}
+        run: |
+          cd browser-extension
+          npx web-ext sign --api-key "$FIREFOX_API_KEY" --api-secret "$FIREFOX_API_SECRET"
