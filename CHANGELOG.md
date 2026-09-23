@@ -3,6 +3,13 @@
 All notable changes to NotebookAwesome are documented here.
 This file is generated from [Conventional Commits](https://www.conventionalcommits.org/).
 
+## [0.2.4](https://github.com/royayon/NoteBookAwesome/compare/v0.2.3...v0.2.4) (2026-09-23)
+
+
+### Features
+
+* add cross-browser extension for Colab and Jupyter Notebooks with CI/CD release workflow ([9a410f5](https://github.com/royayon/NoteBookAwesome/commit/9a410f537ae87027ace51fab1c3c83c0d290e760))
+
 ## [0.2.3](https://github.com/royayon/NoteBookAwesome/compare/v0.2.2...v0.2.3) (2026-07-27)
 
 ## [0.2.2](https://github.com/royayon/NoteBookAwesome/compare/v0.2.1...v0.2.2) (2026-07-27)

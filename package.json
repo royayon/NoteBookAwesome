@@ -2,7 +2,7 @@
   "name": "notebookawesome",
   "displayName": "NotebookAwesome",
   "description": "Numbered & nameable cell headers, a color-coded cell navigator, and custom run sequences for Jupyter notebooks. Jump, search, color-tag, and run cells in any order. Works in VS Code, Cursor, Windsurf, and all VS Code-compatible editors.",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "publisher": "royayon",
   "license": "GPL-3.0-or-later",
   "repository": {
