@@ -93,3 +93,9 @@ Names, colors, and run sequences are stored in the notebook's own metadata (`not
 ### 🌐 Google Colab & Browser Jupyter (Chrome, Edge, Firefox, Brave)
 - Load unpacked from the [`browser-extension/`](browser-extension/) folder or install from the Chrome Web Store / Edge Add-ons Store.
 - See [`browser-extension/README.md`](browser-extension/README.md) for full developer & publishing details.
+
+---
+
+## 🔒 Privacy Policy
+
+NotebookAwesome respects your privacy. The extension does not collect, track, or transmit any user data. Read our full [Privacy Policy](PRIVACY_POLICY.md).

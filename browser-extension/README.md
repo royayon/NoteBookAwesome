@@ -85,3 +85,9 @@ The extension is **100% Manifest V3 ready** for instant submission to all major 
 ### 3. 🦊 Firefox Add-ons (AMO)
 1. Go to [Mozilla Add-on Developer Hub](https://addons.mozilla.org/developers/).
 2. Submit the extension ZIP under Manifest V3 compatibility mode (v109+).
+
+---
+
+## 🔒 Privacy Policy
+
+Read the full [Privacy Policy](../PRIVACY_POLICY.md).
