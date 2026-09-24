@@ -1,5 +1,9 @@
 {
   "categories": ["web-development"],
-  "summary": "Numbered headers, cell names, cell navigator sidebar, and custom run sequences for Google Colab and Jupyter Notebooks.",
-  "license": "GPL-3.0-or-later"
+  "summary": {
+    "en-US": "Numbered headers, cell names, cell navigator sidebar, and custom run sequences for Google Colab and Jupyter Notebooks."
+  },
+  "version": {
+    "license": "GPL-3.0-or-later"
+  }
 }
