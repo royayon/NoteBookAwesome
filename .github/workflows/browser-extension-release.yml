@@ -63,6 +63,7 @@ jobs:
           name: browser-extension-zip
       - name: Publish to Chrome Web Store
         if: ${{ env.EXTENSION_ID != '' && env.CLIENT_ID != '' }}
+        continue-on-error: true
         run: npx chrome-webstore-upload-cli@3 upload --source notebookawesome-browser-extension.zip --extension-id "$EXTENSION_ID" --client-id "$CLIENT_ID" --client-secret "$CLIENT_SECRET" --refresh-token "$REFRESH_TOKEN" --auto-publish
 
   publish-firefox-addons:
