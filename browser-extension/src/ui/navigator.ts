@@ -44,62 +44,78 @@ export class NavigatorPanel {
     this.render();
   }
 
+  private el(tag: string, attrs?: Record<string, string>, children?: (Node | string)[]): HTMLElement {
+    const e = document.createElement(tag);
+    if (attrs) {
+      for (const [k, v] of Object.entries(attrs)) {
+        if (k === 'className') e.className = v;
+        else e.setAttribute(k, v);
+      }
+    }
+    if (children) {
+      for (const c of children) {
+        e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+      }
+    }
+    return e;
+  }
+
   private render(): void {
     const cells = this.adapter.getCells();
 
-    this.container.innerHTML = `
-      <!-- Toolbar Header -->
-      <div class="toolbar">
-        <button class="toolbar-btn ${this.colorStripOpen || this.filterColor ? 'active' : ''}" id="nba-btn-color" title="Filter by color tag">● Color</button>
-        <button class="toolbar-btn ${this.grouped ? 'active' : ''}" id="nba-btn-group" title="Group by Markdown headings">⊞ Group</button>
-        <button class="toolbar-btn ${this.seqPanelOpen ? 'active' : ''}" id="nba-btn-runs" title="Toggle custom run sequences">▶ Runs</button>
-        <div class="toolbar-sep"></div>
-        <button class="toolbar-btn ${this.filterType === 'code' ? 'active' : ''}" id="nba-btn-code" title="Show code cells only">Code</button>
-        <button class="toolbar-btn ${this.filterType === 'markdown' ? 'active' : ''}" id="nba-btn-md" title="Show markdown cells only">MD</button>
-      </div>
+    while (this.container.firstChild) this.container.removeChild(this.container.firstChild);
 
-      <!-- Color Palette Filter Strip -->
-      <div class="palette-strip ${this.colorStripOpen ? 'open' : ''}">
-        ${DEFAULT_COLOR_PALETTE.map(p => `
-          <button class="palette-dot ${this.filterColor === p.color ? 'active' : ''}" data-color="${p.color}" title="Show only ${p.name} cells" style="color: ${p.color}">●</button>
-        `).join('')}
-        <button class="palette-all" id="nba-color-all">All</button>
-      </div>
+    // Toolbar Header
+    const toolbar = this.el('div', { className: 'toolbar' }, [
+      this.el('button', { className: `toolbar-btn ${this.colorStripOpen || this.filterColor ? 'active' : ''}`, id: 'nba-btn-color', title: 'Filter by color tag' }, ['● Color']),
+      this.el('button', { className: `toolbar-btn ${this.grouped ? 'active' : ''}`, id: 'nba-btn-group', title: 'Group by Markdown headings' }, ['⊞ Group']),
+      this.el('button', { className: `toolbar-btn ${this.seqPanelOpen ? 'active' : ''}`, id: 'nba-btn-runs', title: 'Toggle custom run sequences' }, ['▶ Runs']),
+      this.el('div', { className: 'toolbar-sep' }),
+      this.el('button', { className: `toolbar-btn ${this.filterType === 'code' ? 'active' : ''}`, id: 'nba-btn-code', title: 'Show code cells only' }, ['Code']),
+      this.el('button', { className: `toolbar-btn ${this.filterType === 'markdown' ? 'active' : ''}`, id: 'nba-btn-md', title: 'Show markdown cells only' }, ['MD']),
+    ]);
+    this.container.appendChild(toolbar);
 
-      <!-- Run Sequences Panel -->
-      <div class="seq-panel ${this.seqPanelOpen ? 'open' : ''}">
-        ${this.sequences.map((s, i) => `
-          <div class="seq-row" data-seq="${i}" data-result="${s.status}">
-            <input class="seq-name" data-seq="${i}" placeholder="Name" value="${this.escapeHtml(s.name)}" />
-            <input class="seq-nums" data-seq="${i}" placeholder="2, 3, 4-8" value="${this.escapeHtml(s.spec)}" />
-            <button class="seq-run" data-seq="${i}" title="Run this sequence">
-              <span class="seq-arrow">▶</span>
-              <span class="seq-spin"></span>
-            </button>
-            <button class="seq-del" data-seq="${i}" title="Delete sequence">✕</button>
-          </div>
-        `).join('')}
-        <button class="add-seq-btn" id="nba-add-seq-btn">+ Add run sequence</button>
-      </div>
+    // Color Palette Filter Strip
+    const paletteStrip = this.el('div', { className: `palette-strip ${this.colorStripOpen ? 'open' : ''}` });
+    DEFAULT_COLOR_PALETTE.forEach(p => {
+      paletteStrip.appendChild(this.el('button', { className: `palette-dot ${this.filterColor === p.color ? 'active' : ''}`, 'data-color': p.color, title: `Show only ${p.name} cells`, style: `color: ${p.color}` }, ['●']));
+    });
+    paletteStrip.appendChild(this.el('button', { className: 'palette-all', id: 'nba-color-all' }, ['All']));
+    this.container.appendChild(paletteStrip);
 
-      <!-- Search Input -->
-      <div class="search-wrap">
-        <input class="search-input" id="nba-search-input" placeholder="Search by cell number or name..." value="${this.escapeHtml(this.filterText)}" />
-      </div>
+    // Run Sequences Panel
+    const seqPanel = this.el('div', { className: `seq-panel ${this.seqPanelOpen ? 'open' : ''}` });
+    this.sequences.forEach((s, i) => {
+      const nameInput = this.el('input', { className: 'seq-name', 'data-seq': `${i}`, placeholder: 'Name' }) as HTMLInputElement;
+      nameInput.value = s.name;
+      const numsInput = this.el('input', { className: 'seq-nums', 'data-seq': `${i}`, placeholder: '2, 3, 4-8' }) as HTMLInputElement;
+      numsInput.value = s.spec;
+      const runBtn = this.el('button', { className: 'seq-run', 'data-seq': `${i}`, title: 'Run this sequence' }, [
+        this.el('span', { className: 'seq-arrow' }, ['▶']),
+        this.el('span', { className: 'seq-spin' }),
+      ]);
+      const delBtn = this.el('button', { className: 'seq-del', 'data-seq': `${i}`, title: 'Delete sequence' }, ['✕']);
+      seqPanel.appendChild(this.el('div', { className: 'seq-row', 'data-seq': `${i}`, 'data-result': s.status }, [nameInput, numsInput, runBtn, delBtn]));
+    });
+    seqPanel.appendChild(this.el('button', { className: 'add-seq-btn', id: 'nba-add-seq-btn' }, ['+ Add run sequence']));
+    this.container.appendChild(seqPanel);
 
-      <!-- Cell List Container -->
-      <div class="cell-list-container" id="nba-cell-list">
-        <!-- Cells rendered dynamically -->
-      </div>
+    // Search Input
+    const searchInput = this.el('input', { className: 'search-input', id: 'nba-search-input', placeholder: 'Search by cell number or name...' }) as HTMLInputElement;
+    searchInput.value = this.filterText;
+    this.container.appendChild(this.el('div', { className: 'search-wrap' }, [searchInput]));
 
-      <!-- Color Picker Popover (Floating) -->
-      <div class="color-picker-popover" id="nba-color-picker-popover" style="display: none;">
-        ${DEFAULT_COLOR_PALETTE.map(p => `
-          <button class="cp-dot" data-color="${p.color}" title="${p.name}" style="color:${p.color}">●</button>
-        `).join('')}
-        <button class="cp-clear" id="nba-cp-clear" title="Clear color">✖</button>
-      </div>
-    `;
+    // Cell List Container
+    this.container.appendChild(this.el('div', { className: 'cell-list-container', id: 'nba-cell-list' }));
+
+    // Color Picker Popover (Floating)
+    const cpPopover = this.el('div', { className: 'color-picker-popover', id: 'nba-color-picker-popover', style: 'display: none;' });
+    DEFAULT_COLOR_PALETTE.forEach(p => {
+      cpPopover.appendChild(this.el('button', { className: 'cp-dot', 'data-color': p.color, title: p.name, style: `color:${p.color}` }, ['●']));
+    });
+    cpPopover.appendChild(this.el('button', { className: 'cp-clear', id: 'nba-cp-clear', title: 'Clear color' }, ['✖']));
+    this.container.appendChild(cpPopover);
 
     this.attachEvents();
     this.renderCellRows(cells);
@@ -261,13 +277,17 @@ export class NavigatorPanel {
     });
 
     if (filteredCells.length === 0) {
-      listContainer.innerHTML = `<div class="empty">No matching cells found</div>`;
+      const emptyDiv = document.createElement('div');
+      emptyDiv.className = 'empty';
+      emptyDiv.textContent = 'No matching cells found';
+      while (listContainer.firstChild) listContainer.removeChild(listContainer.firstChild);
+      listContainer.appendChild(emptyDiv);
       return;
     }
 
     if (this.grouped) {
       const sections = this.buildSections(filteredCells);
-      listContainer.innerHTML = '';
+      while (listContainer.firstChild) listContainer.removeChild(listContainer.firstChild);
       sections.forEach((sec, secIdx) => {
         const secDiv = document.createElement('div');
         secDiv.className = 'section';
@@ -278,10 +298,15 @@ export class NavigatorPanel {
 
           const secHdr = document.createElement('div');
           secHdr.className = 'sec-hdr';
-          secHdr.innerHTML = `
-            <span class="chevron">${isCollapsed ? '▸' : '▾'}</span>
-            <span class="sec-label" title="Double-click to rename">${this.escapeHtml(hName)}</span>
-          `;
+          const chevron = document.createElement('span');
+          chevron.className = 'chevron';
+          chevron.textContent = isCollapsed ? '▸' : '▾';
+          const secLabel = document.createElement('span');
+          secLabel.className = 'sec-label';
+          secLabel.title = 'Double-click to rename';
+          secLabel.textContent = hName;
+          secHdr.appendChild(chevron);
+          secHdr.appendChild(secLabel);
 
           secHdr.querySelector('.chevron')?.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -321,7 +346,7 @@ export class NavigatorPanel {
         listContainer.appendChild(secDiv);
       });
     } else {
-      listContainer.innerHTML = '';
+      while (listContainer.firstChild) listContainer.removeChild(listContainer.firstChild);
       filteredCells.forEach(cell => {
         listContainer.appendChild(this.createCellRowElement(cell, false));
       });

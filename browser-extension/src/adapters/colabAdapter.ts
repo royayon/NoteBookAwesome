@@ -136,7 +136,10 @@ export class ColabAdapter implements NotebookAdapter {
         colabTab.className = 'nba-colab-tab-button';
         colabTab.setAttribute('role', 'tab');
         colabTab.title = 'NotebookAwesome Cell Navigator';
-        colabTab.innerHTML = `<span style="font-size: 16px;">🔢</span>`;
+        const tabIcon = document.createElement('span');
+        tabIcon.style.fontSize = '16px';
+        tabIcon.textContent = '🔢';
+        colabTab.appendChild(tabIcon);
 
         tabBar.appendChild(colabTab);
 
